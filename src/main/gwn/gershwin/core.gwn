@@ -1,0 +1,6 @@
+;; Gershwin
+
+;; IN: glossa.core
+(do (in-ns 'glossa.core) ::stack-void)
+
+: add [n n -- n] (+ (Stack/popIt) (Stack/popIt)) ;

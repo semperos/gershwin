@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 public class Compiler {
-    static final String GERSHWIN_VAR_PREFIX = "__GLS__";
+    static final String GERSHWIN_VAR_PREFIX = "__GWN__";
     static final Symbol DEF = Symbol.intern("def");
     static final Symbol FN = Symbol.intern("fn");
 

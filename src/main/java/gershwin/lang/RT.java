@@ -6,7 +6,7 @@ import clojure.lang.Namespace;
 import clojure.lang.Symbol;
 
 public class RT {
-    final static private String GERSHWIN_VAR_PREFIX = "__GLS__";
+    final static private String GERSHWIN_VAR_PREFIX = "__GWN__";
     final static private IFn IN_NS = ClojureApi.var("clojure.core", "in-ns");
     final static private IFn IMPORT = ClojureApi.var("clojure.core", "import");
     final static private IFn REFER = ClojureApi.var("clojure.core", "refer");

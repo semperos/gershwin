@@ -1,4 +1,4 @@
-# Glossa
+# Gershwin #
 
 Clojure + stack-based language.
 
@@ -8,47 +8,47 @@ The easiest way to get started is to clone this repository and run `lein run` at
 lein run
 ```
 
-This will open up a Glossa REPL. Try out the following:
+This will open up a Gershwin REPL. Try out the following:
 
 ```
-glossa.core> 20
+gershwin> 20
 
 --- Data Stack:
 20
 
-glossa.core> 22
-
---- Data Stack:
-20
-22
-
-glossa.core> : add [] (+ (GlossaStack/popIt) (GlossaStack/popIt)) ;
+gershwin> 22
 
 --- Data Stack:
 20
 22
 
-glossa.core> add
+gershwin> : add [] (+ (Stack/popIt) (Stack/popIt)) ;
+
+--- Data Stack:
+20
+22
+
+gershwin> add
 
 --- Data Stack:
 42
 
-glossa.core> : add-2 [] 2 add ;
+gershwin> : add-2 [] 2 add ;
 
 --- Data Stack:
 42
 
-glossa.core> add-2
+gershwin> add-2
 
 --- Data Stack:
 44
 
-glossa.core> add-2 add-2
+gershwin> add-2 add-2
 
 --- Data Stack:
 46
 
-glossa.core>
+gershwin>
 --- Data Stack:
 48
 ```
@@ -56,18 +56,18 @@ glossa.core>
 How about Clojure ratios?
 
 ```
-glossa.core> 1/3
+gershwin> 1/3
 
 --- Data Stack:
 1/3
 
-glossa.core> 1/4
+gershwin> 1/4
 
 --- Data Stack:
 1/3
 1/4
 
-glossa.core> add
+gershwin> add
 
 --- Data Stack:
 7/12

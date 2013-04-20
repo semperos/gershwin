@@ -2,6 +2,7 @@ package gershwin.lang;
 
 import clojure.lang.IPersistentCollection;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -14,6 +15,14 @@ import java.util.List;
 public class Word {
     private final IPersistentCollection stackEffect;
     private final List definitionForms;
+
+    /**
+     * Word definitions created programmatically don't require the usual.
+     */
+    public Word() {
+        this.stackEffect = null;
+        this.definitionForms = null;
+    }
 
     /**
      * The stack effect is entered directly as a Clojure vector, hence
@@ -29,6 +38,18 @@ public class Word {
     public Word(IPersistentCollection stackEffect, List definitionForms) {
         this.stackEffect = stackEffect;
         this.definitionForms = definitionForms;
+    }
+
+    /**
+     * Invoke a word definition by evaluating its forms.
+     */
+    public Object invoke() {
+        Object ret = null;
+        Iterator iter = definitionForms.iterator();
+        while (iter.hasNext()) {
+            ret = Compiler.eval(iter.next());
+        }
+        return ret;
     }
 
     public List getDefinition() {

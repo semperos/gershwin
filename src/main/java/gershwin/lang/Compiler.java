@@ -14,7 +14,6 @@ import clojure.lang.Symbol;
 import clojure.lang.Var;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.io.File;
 import java.io.FileInputStream;
@@ -143,13 +142,7 @@ public class Compiler {
          */
         public Object eval() {
             // System.out.println("Eval'ing a Word");
-            List wordDefinition = word.getDefinition();
-            Object ret = null;
-            Iterator iter = wordDefinition.iterator();
-            while (iter.hasNext()) {
-                ret = Compiler.eval(iter.next());
-            }
-            return ret;
+            return word.invoke();
         }
     }
 
@@ -252,7 +245,7 @@ public class Compiler {
     public static Object loadFile(String file) throws IOException {
 	FileInputStream f = new FileInputStream(file);
 	try {
-            return load(new InputStreamReader(f, clojure.lang.RT.UTF8), new File(file).getAbsolutePath(), (new File(file)).getName());
+            return load(new InputStreamReader(f, RT.UTF8), new File(file).getAbsolutePath(), (new File(file)).getName());
         }
 	finally {
             f.close();

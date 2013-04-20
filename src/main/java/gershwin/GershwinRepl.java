@@ -7,6 +7,7 @@ import gershwin.lang.RT;
 import gershwin.lang.Stack;
 
 import clojure.lang.LispReader;
+import clojure.lang.Namespace;
 import clojure.lang.SeqEnumeration;
 
 import java.io.InputStreamReader;
@@ -18,7 +19,10 @@ import java.io.OutputStreamWriter;
 public class GershwinRepl {
     // @todo This should be something like "user>" with gershwin.core having been
     //   referred in.
-    private static final String REPL_PROMPT = "gershwin> ";
+    private static String formatPrompt() {
+        Namespace ns = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
+        return ns.toString() + "> ";
+    }
 
     public static void main(String[] args) {
 	LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in), 2);
@@ -30,7 +34,7 @@ public class GershwinRepl {
 	try {
             for(; ;) {
                 if(firstPass) {
-                    w.write(REPL_PROMPT);
+                    w.write(formatPrompt());
                     w.flush();
                     firstPass = false;
                 }
@@ -48,7 +52,7 @@ public class GershwinRepl {
                         w.write('\n');
                         w.flush();
                     }
-                    w.write(REPL_PROMPT);
+                    w.write(formatPrompt());
                     w.flush();
                 } else {
                     r.unread(ch);

@@ -10,7 +10,7 @@ import java.util.Collection;
  * returns {@link List} instances, so barring any particular reason to create
  * an additional Clojure data structure, {@link ArrayList} is fine.
  */
-public class ColonList extends ArrayList implements IColonList {
+public class ColonList extends ArrayList implements IGershwinList {
     public ColonList() {
         super();
     }

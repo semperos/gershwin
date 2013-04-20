@@ -64,6 +64,10 @@ public class Parser {
 
                 /**** Gershwin extensions to Clojure reading ****/
                 // Word definitions
+                // This is what requires our PushbackReader to have a buffer size of 2.
+                // A ':' could either be a word definition or the beginning of a Clojure keyword.
+                // If ':' is followed by a space, it's a word definition, else it's handed off
+                // to the Clojure reader.
                 if(ch == ':') {
                     int ch2 = LispReader.read1(r);
                     if(isWhitespace(ch2)){
@@ -74,6 +78,14 @@ public class Parser {
                         unread(r, ch2);
                     }
                 }
+
+                // We'll use '<' and '>' to contain quotations, since they're
+                // one of the few characters that are left unreadable by the Clojure reader.
+                if(ch == '<') {
+                    return new QuotationReader().invoke(r, (char) ch);
+                }
+
+                /**** End Gershwin extensions to Clojure reading ****/
                 // Everything else is just Clojure.
                 // System.out.println("Clojure Reader => " + (char) ch);
                 unread(r, ch);
@@ -92,6 +104,14 @@ public class Parser {
             // System.out.println("COLON READER!");
             PushbackReader r = (PushbackReader) reader;
             return new ColonList(LispReader.readDelimitedList(';', r, false));
+        }
+    }
+
+    public static class QuotationReader extends AFn {
+        public Object invoke(Object reader, Object colon) {
+            // System.out.println("QUOTATION READER!");
+            PushbackReader r = (PushbackReader) reader;
+            return new QuotationList(LispReader.readDelimitedList('>', r, false));
         }
     }
 

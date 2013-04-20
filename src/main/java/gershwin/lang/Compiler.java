@@ -98,9 +98,9 @@ public class Compiler {
      * @todo Make private
      */
     public static class ColonExpr implements Expr {
-        final IColonList l;
+        final IGershwinList l;
 
-        public ColonExpr(IColonList l) {
+        public ColonExpr(IGershwinList l) {
             this.l = l;
         }
 
@@ -163,9 +163,9 @@ public class Compiler {
     // @todo Make private
     public static Expr analyze(Object form) {
         // System.out.println("ANALYZE FORM: " + form.getClass().getName() + ", " + form);
-        if(form instanceof IColonList) {
+        if(form instanceof ColonList) {
             // System.out.println("GERSHWIN Word Definition: " + form);
-            return analyzeColon((IColonList) form);
+            return analyzeColon((ColonList) form);
         } else if(form instanceof Symbol) {
             Symbol formSym = (Symbol) form;
             String maybeVarName = formSym.getName();
@@ -195,7 +195,7 @@ public class Compiler {
      * and ensure it's formed sanely, throwing an error about
      * too many/too few args to `def` if not.
      */
-    public static Expr analyzeColon(IColonList form) {
+    public static Expr analyzeColon(ColonList form) {
         if (form.size() < 3) {
             throw clojure.lang.Util.runtimeException("Too few arguments to ':'. You must include:\n\t(1) The name of the word\n\t(2) The intended stack effect of the word\n\t(3) The word definition.\n");
         } else if(!(form.get(0) instanceof Symbol)) {

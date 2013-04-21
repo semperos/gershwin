@@ -2,6 +2,10 @@
 
 : dup [n -- n n] (let [a (Stack/popIt)] (Stack/conjMutable a) a) ;
 
+(do
+  ;; Functions and macros for common Clojure interop needs
+  (defmacro stack-void [& body] `(do ~@body ::stack-void)) ::stack-void)
+
 : invoke [] (do (.invoke (Stack/popIt)) ::stack-void) ;
 
 : add [n n -- n] (+ (Stack/popIt) (Stack/popIt)) ;

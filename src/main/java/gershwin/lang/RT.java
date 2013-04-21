@@ -5,9 +5,14 @@ import clojure.lang.Keyword;
 import clojure.lang.Namespace;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
+import static clojure.lang.RT.baseLoader;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +29,77 @@ public class RT {
 
     public static Charset UTF8 = Charset.forName("UTF-8");
     public final static Keyword STACK_VOID = Keyword.intern("gershwin.core", "stack-void");
+
+    public static void loadResourceScript(String name) throws IOException {
+	loadResourceScript(name, true);
+    }
+
+    public static void loadResourceScript(String name, boolean failIfNotFound) throws IOException {
+	loadResourceScript(RT.class, name, failIfNotFound);
+    }
+
+    public static void loadResourceScript(Class c, String name) throws IOException {
+	loadResourceScript(c, name, true);
+    }
+
+    public static void loadResourceScript(Class c, String name, boolean failIfNotFound) throws IOException {
+	int slash = name.lastIndexOf('/');
+	String file = slash >= 0 ? name.substring(slash + 1) : name;
+	InputStream ins = clojure.lang.RT.resourceAsStream(baseLoader(), name);
+	if(ins != null) {
+            try {
+                Compiler.load(new InputStreamReader(ins, UTF8), name, file);
+            }
+            finally {
+                ins.close();
+            }
+	}
+	else if(failIfNotFound) {
+            throw new FileNotFoundException("Could not locate Gershwin resource on classpath: " + name);
+	}
+    }
+
+    static public void load(String scriptbase) throws IOException, ClassNotFoundException {
+	load(scriptbase, true);
+    }
+
+    static public void load(String scriptbase, boolean failIfNotFound) throws IOException, ClassNotFoundException {
+	String classfile = scriptbase + clojure.lang.RT.LOADER_SUFFIX + ".class";
+	// String cljfile = scriptbase + ".clj";
+        String gwnfile = scriptbase + ".gwn";
+	URL classURL = clojure.lang.RT.getResource(baseLoader(),classfile);
+	// URL cljURL = clojure.lang.RT.getResource(baseLoader(), cljfile);
+        URL gwnURL = clojure.lang.RT.getResource(baseLoader(), gwnfile);
+	boolean loaded = false;
+
+	if((classURL != null &&
+	    (gwnURL == null
+	     || clojure.lang.RT.lastModified(classURL, classfile) > clojure.lang.RT.lastModified(gwnURL, gwnfile)))
+	   || classURL == null) {
+            loaded = (loadClassForName(scriptbase.replace('/', '.') +
+                                       clojure.lang.RT.LOADER_SUFFIX) != null);
+	}
+	if(!loaded && gwnURL != null) {
+            // When Gershwin supports AOT compilation:
+            // if(clojure.lang.RT.booleanCast(clojure.lang.Compiler.COMPILE_FILES.deref()))
+            //     compile(gwnfile);
+            // else
+            loadResourceScript(clojure.lang.RT.class, gwnfile);
+	}
+	else if(!loaded && failIfNotFound)
+            throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath: ", classfile, gwnfile));
+    }
+
+    static public Class loadClassForName(String name) throws ClassNotFoundException {
+	try {
+            Class.forName(name, false, baseLoader());
+        }
+	catch(ClassNotFoundException e) {
+            // This means the source file needs to be compiled.
+            return null;
+        }
+	return Class.forName(name, true, baseLoader());
+    }
 
     public static void doInit() {
         // clojure.lang.Compiler.eval(RT.list(IN_NS, GERSHWIN));
@@ -66,106 +142,6 @@ public class RT {
         }
     }
 }
-
-/**
-static public void print(Object x, Writer w) throws IOException{
-		if(x == null)
-			w.write("nil");
-		else if(x instanceof ISeq || x instanceof IPersistentList) {
-			w.write('(');
-			printInnerSeq(seq(x), w);
-			w.write(')');
-		}
-		else if(x instanceof IPersistentMap) {
-			w.write('{');
-			for(ISeq s = seq(x); s != null; s = s.next()) {
-				IMapEntry e = (IMapEntry) s.first();
-				print(e.key(), w);
-				w.write(' ');
-				print(e.val(), w);
-				if(s.next() != null)
-					w.write(", ");
-			}
-			w.write('}');
-		}
-		else if(x instanceof IPersistentVector) {
-			IPersistentVector a = (IPersistentVector) x;
-			w.write('[');
-			for(int i = 0; i < a.count(); i++) {
-				print(a.nth(i), w);
-				if(i < a.count() - 1)
-					w.write(' ');
-			}
-			w.write(']');
-		}
-		else if(x instanceof IPersistentSet) {
-			w.write("#{");
-			for(ISeq s = seq(x); s != null; s = s.next()) {
-				print(s.first(), w);
-				if(s.next() != null)
-					w.write(" ");
-			}
-			w.write('}');
-		}
-		else if(x instanceof Character) {
-			char c = ((Character) x).charValue();
-			if(!readably)
-				w.write(c);
-			else {
-				w.write('\\');
-				switch(c) {
-					case '\n':
-						w.write("newline");
-						break;
-					case '\t':
-						w.write("tab");
-						break;
-					case ' ':
-						w.write("space");
-						break;
-					case '\b':
-						w.write("backspace");
-						break;
-					case '\f':
-						w.write("formfeed");
-						break;
-					case '\r':
-						w.write("return");
-						break;
-					default:
-						w.write(c);
-				}
-			}
-		}
-		else if(x instanceof Class) {
-			w.write("#=");
-			w.write(((Class) x).getName());
-		}
-		else if(x instanceof BigDecimal && readably) {
-			w.write(x.toString());
-			w.write('M');
-		}
-		else if(x instanceof BigInt && readably) {
-			w.write(x.toString());
-			w.write('N');
-		}
-		else if(x instanceof BigInteger && readably) {
-			w.write(x.toString());
-			w.write("BIGINT");
-		}
-		else if(x instanceof Var) {
-			Var v = (Var) x;
-			w.write("#=(var " + v.ns.name + "/" + v.sym + ")");
-		}
-		else if(x instanceof Pattern) {
-			Pattern p = (Pattern) x;
-			w.write("#\"" + p.pattern() + "\"");
-		}
-		else w.write(x.toString());
-	}
-
-}
- **/
 
 /**
 // From clojure.lang.RT. Note the inclusion of a definition for load-file.

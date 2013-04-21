@@ -125,6 +125,25 @@ public class Compiler {
     }
 
     /**
+     * Quotation expr
+     *
+     * @todo Make private
+     */
+    public static class QuotationExpr implements Expr {
+        final IGershwinList l;
+
+        public QuotationExpr(IGershwinList l) {
+            this.l = l;
+        }
+
+        public Object eval() {
+            Quotation quotation = new Quotation(l);
+            Stack.conjMutable(quotation);
+            return quotation;
+        }
+    }
+
+    /**
      * Word expr
      *
      * @todo Make private
@@ -163,9 +182,13 @@ public class Compiler {
     // @todo Make private
     public static Expr analyze(Object form) {
         // System.out.println("ANALYZE FORM: " + form.getClass().getName() + ", " + form);
+        // @todo Make interfaces for these if appropriate and use them for dispatch
         if(form instanceof ColonList) {
             // System.out.println("GERSHWIN Word Definition: " + form);
             return analyzeColon((ColonList) form);
+        } else if(form instanceof QuotationList) {
+            // System.out.println("GERSHWIN Quotation: " + form);
+            return analyzeQuotation((QuotationList) form);
         } else if(form instanceof Symbol) {
             Symbol formSym = (Symbol) form;
             String maybeVarName = formSym.getName();
@@ -202,6 +225,10 @@ public class Compiler {
             throw clojure.lang.Util.runtimeException("First argument to ':' must be a Symbol");
         }
         return new ColonExpr(form);
+    }
+
+    public static Expr analyzeQuotation(QuotationList form) {
+        return new QuotationExpr(form);
     }
 
     /**

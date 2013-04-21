@@ -42,9 +42,11 @@ public class GershwinRepl {
                 if (ch == 10) {
                     if(!firstPass) {
                         w.write("\n--- Data Stack:\n");
+                        // @todo See RT.java's printInnerSeq method for correct way
+                        //   to iterate through a seq
                         SeqEnumeration iter = new SeqEnumeration(Stack.seq());
                         while (iter.hasMoreElements()) {
-                            clojure.lang.RT.print(iter.nextElement(), w);
+                            RT.print(iter.nextElement(), w);
                             // w.write(iter.nextElement().toString());
                             w.write('\n');
                         }

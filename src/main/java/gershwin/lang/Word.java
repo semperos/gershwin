@@ -12,7 +12,7 @@ import java.util.List;
  * itself will consist of other words and primitives (Clojure/Java)
  * that need to be recursively evaluated until executable code is found.
  */
-public class Word {
+public class Word implements IInvokable {
     private final IPersistentCollection stackEffect;
     private final List definitionForms;
 
@@ -52,11 +52,4 @@ public class Word {
         return ret;
     }
 
-    public List getDefinition() {
-        return definitionForms;
-    }
-
-    public IPersistentCollection getStackEffect() {
-        return stackEffect;
-    }
 }

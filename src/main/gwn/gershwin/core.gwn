@@ -1,6 +1,7 @@
-;; Gershwin
+: . [n --] (do (Stack/popIt) ::stack-void) ;
 
-;; IN: gershwin.core
-(do (in-ns 'gershwin.core) ::stack-void)
+: dup [n -- n n] (let [a (Stack/popIt)] (Stack/conjMutable a) a) ;
+
+: invoke [] (do (.invoke (Stack/popIt)) ::stack-void) ;
 
 : add [n n -- n] (+ (Stack/popIt) (Stack/popIt)) ;

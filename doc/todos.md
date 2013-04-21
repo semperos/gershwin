@@ -2,8 +2,10 @@
 
  * Implement quotations
  * Hide compiler details in Gershwin's RT class (make a survey of what Clojure's does)
+ * When defining a new word, print symbol 'ok' at the REPL
  * Implement custom print method in Gershwin's RT class
  * Implement 'if'
+ * Reconsider how vars default back to Clojure ones if not present as Gershwin ones (likely to cause confusion)
  * Enhancements to Clojure interop for:
      - Turning regular Clojure functions into ones that use the data stack
      - Capturing the (do ... :gershwin.core/stack-void) to prevent a Clojure expression's value from making it onto the data stack.

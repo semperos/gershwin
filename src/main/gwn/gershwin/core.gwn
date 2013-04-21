@@ -1,11 +1,19 @@
-: . [n --] (do (Stack/popIt) ::stack-void) ;
-
-: dup [n -- n n] (let [a (Stack/popIt)] (Stack/conjMutable a) a) ;
-
 (do
   ;; Functions and macros for common Clojure interop needs
-  (defmacro stack-void [& body] `(do ~@body ::stack-void)) ::stack-void)
+  (defmacro stack-void [& body] `(do ~@body ::stack-void))
+  (defn pop-it [] (Stack/popIt))
+  (defn conj-it [x] (Stack/conjMutable x))
+  (defn pop1 [a-fn] (a-fn (pop-it)))
+  (defn pop2 [a-fn] (a-fn (pop-it) (pop-it)))
+  (defn pop3 [a-fn] (a-fn (pop-it) (pop-it) (pop-it)))
+  ;; If we need it, I really want to call one of these
+  ;; swap-n-pop.
+  ::stack-void)
 
-: invoke [] (do (.invoke (Stack/popIt)) ::stack-void) ;
+: . [n --] (do (pop-it) ::stack-void) ;
 
-: add [n n -- n] (+ (Stack/popIt) (Stack/popIt)) ;
+: dup [n -- n n] (let [a (pop-it)] (conj-it a) a) ;
+
+: invoke [] (do (.invoke (pop-it)) ::stack-void) ;
+
+: + [n n -- n] (pop2 +) ;

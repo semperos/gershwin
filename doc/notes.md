@@ -19,3 +19,13 @@ High-level Clojure evaluation workflow:
     * The eval method does the type-specific evaluation of the form
     * The val method returns the value of the given expression. For String literals, for example, calling eval() is the same as calling val(), and val() is the same as returning the original String that was passed into the constructor for StringExpr.
     * The emit method encodes how to emit the given data structure as JVM bytecode. This is where, for example, String values are pushed onto the JVM stack.
+
+### Loading Code ###
+
+Clojure relies primarily on loading files from the classpath, to include either already-compiled class files or Clojure source files if no class files exist. The only code that tries to load class files appears to be the `load` method in RT.java.
+
+If there is no class file, Clojure will on-the-fly compile code. This is the `loadResourceScript` method in RT.java which gets called by `load` if there is no appropriate classfile for something you're trying to load. This `loadResourceScript` method calls the compiler's `load` method, which reads in the file and evaluates all its forms.
+
+As a secondary mechanism, probably put in place during Clojure's initial development (although he does add extra metadata to load-file in Clojure, so perhaps it's intentional for some reason), you can load a file directly from the filesystem using the compilers `load-file` method. This calls the same `load` method in the compiler, simply providing a file reader instead of another kind of reader. In this way, it completely bypasses any consideration of the classpath or any AOT-compiled Clojure files that might be there.
+
+Further, in core.clj, the functions `load-reader` and therefore `load-string` also call directly to the Clojure compiler, i.e. they do not look to the classpath for AOT-compiled files.

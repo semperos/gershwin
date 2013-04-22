@@ -95,6 +95,8 @@
 
 : load-paths [ss --] (apply load (pop-it)) ;
 
+! Shuffle words
+
 : . [x --] (do (pop-it) ::stack-void) ;
 
 : dup [x -- x x] (let [a (pop-it)] (conj-it a) a) ;

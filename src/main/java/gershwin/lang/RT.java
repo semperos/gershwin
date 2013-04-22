@@ -106,9 +106,13 @@ public class RT {
         IN_NS.invoke(GERSHWIN);
         GERSHWIN_NS.importClass(STACK_CLASS_SYM, gershwin.lang.Stack.class);
         REFER.invoke(CLOJURE);
-        // Clojure defines this in RT.java. Not entirely sure why,
-        // perhaps just to avoid a call to the language's compiler
-        // from the language itself.
+        // Example of creating a Word programmatically.
+        // Clojure includes this for some reason in its RT.java, but then
+        // calls Compiler.loadFile directly in src/clj/clojure/main.clj.
+        // So I'm leaving it here for posterity, but I don't know why it's there.
+        // Perhaps just a relic of early development that was never cleaned out.
+        // It's still convenient as an alternative to getting things on or setting up
+        // the classpath just to load code.
 	Var.intern(GERSHWIN_NS, LOAD_FILE,
                    new Word() {
                        public Object invoke() {

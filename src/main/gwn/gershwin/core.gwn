@@ -19,6 +19,9 @@
   (defn pop3 [a-fn] (a-fn (pop-it) (pop-it) (pop-it))))
 
 (stack-void
+  (defn pop-n-swap2 [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a))))
+
+(stack-void
   (defonce ^:dynamic
     ^{:private true
       :doc "A stack of paths currently being loaded by this thread"}
@@ -81,7 +84,7 @@
             ;; This is the main departure from Clojure's load
             (gershwin.lang.RT/load (.substring path 1))))))))
 
-: load [s --] (load (pop-it)) ;
+: load [s --] (stack-void (load (pop-it))) ;
 
 : load-paths [ss --] (apply load (pop-it)) ;
 
@@ -92,3 +95,5 @@
 : invoke [] (do (.invoke (pop-it)) ::stack-void) ;
 
 : + [n n -- n] (pop2 +) ;
+
+: - [n n -- n] (pop-n-swap2 -) ;

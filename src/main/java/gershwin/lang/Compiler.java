@@ -58,8 +58,11 @@ public class Compiler {
 	public Object eval() {
             Object clojureForm = clojure.lang.Compiler.eval(val(), false);
             // System.out.println("Clojure Evaluated: " + clojureForm.getClass().getName() + ", " + clojureForm);
-            if(!clojureForm.equals(RT.STACK_VOID))
+            if(clojureForm == null) {
                 Stack.conjMutable(clojureForm);
+            } else if(!clojureForm.equals(RT.STACK_VOID)) {
+                Stack.conjMutable(clojureForm);
+            }
             return clojureForm;
 	}
 

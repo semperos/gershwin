@@ -7,6 +7,18 @@
   ::stack-void)
 
 (stack-void
+  (defn print*
+    "@todo Research why default print disappears"
+    [msg]
+    (.print (System/out) msg)))
+
+(stack-void
+  (defn println*
+    "@todo Research why default println disappears"
+    [msg]
+    (.println (System/out) msg)))
+
+(stack-void
   (defn pop-it [] (Stack/popIt)))
 
 (stack-void

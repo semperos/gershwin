@@ -78,6 +78,7 @@
         (check-cyclic-dependency path)
         (when-not (= path (first *pending-paths*))
           (binding [*pending-paths* (conj *pending-paths* path)]
+            ;; This is the main departure from Clojure's load
             (gershwin.lang.RT/load (.substring path 1))))))))
 
 : load [s --] (load (pop-it)) ;

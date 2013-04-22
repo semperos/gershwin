@@ -1,6 +1,11 @@
 # Todos #
 
- * Implement 'if'
+## Bugs ##
+
+ * Use of immutable methods on Stack returns `nil` instead of throwing exceptions for stack underflow -- needs to throw exception
+
+## Features ##
+
  * Enhance syntax of defining new words to allow associating metadata with the word
  * Reconsider how vars default back to Clojure ones if not present as Gershwin ones (likely to cause confusion)
  * Enhancements to Clojure interop for:
@@ -10,10 +15,12 @@
 
 ## Maybe's ##
 
- * Allow Factor-style comments with '!'
+ * Allow identifiers that start with numbers, like Factor (name-munging)
 
 ## Done ##
 
+ * [DONE] Implement 'if'
+ * [DONE] Allow Factor-style comments with '!'
  * [DONE] Implement custom print method in Gershwin's RT class
  * [DONE] When defining a new word, print symbol 'ok' at the REPL
  * [DONE] Implement quotations

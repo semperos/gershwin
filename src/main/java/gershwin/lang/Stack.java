@@ -67,6 +67,10 @@ public class Stack {
         return item;
     }
 
+    public static IPersistentStack clear() {
+        return (IPersistentStack) stackAtom.reset(PersistentVector.EMPTY);
+    }
+
     public static ISeq seq() {
         IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
         return rawStack.seq();

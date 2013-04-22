@@ -31,6 +31,13 @@ public class GershwinRepl {
         return ns.toString() + "> ";
     }
 
+    private static void handleEval(Object form, Writer w) throws IOException {
+        if(form instanceof gershwin.lang.Word) {
+            w.write("ok -- word defined\n");
+            w.flush();
+        }
+    }
+
     private static void checkIfExit(Object form, Writer w) throws IOException {
         Keyword exitKw = Keyword.intern("gershwin.core", "exit");
         Keyword quitKw = Keyword.intern("gershwin.core", "quit");
@@ -47,7 +54,8 @@ public class GershwinRepl {
     public static void main(String[] args) throws ClassNotFoundException, IOException {
 	LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in), 2);
 	OutputStreamWriter w = new OutputStreamWriter(System.out);
-	Object ret = null;
+	Object readRet = null;
+        Object evalRet = null;
         RT.doInit();
         boolean firstPass = true;
 	try {
@@ -65,7 +73,7 @@ public class GershwinRepl {
                             RT.print(s.first(), w);
                             w.write('\n');
                         }
-                        w.write('\n');
+                        // w.write('\n');
                         w.flush();
                     }
                     w.write(formatPrompt());
@@ -73,9 +81,10 @@ public class GershwinRepl {
                 } else {
                     r.unread(ch);
                 }
-                ret = Parser.read(r, true, null, false);
-                checkIfExit(ret, w);
-                Compiler.eval(ret);
+                readRet = Parser.read(r, true, null, false);
+                checkIfExit(readRet, w);
+                evalRet = Compiler.eval(readRet);
+                handleEval(evalRet, w);
             }
         }
 	catch(Exception e) {

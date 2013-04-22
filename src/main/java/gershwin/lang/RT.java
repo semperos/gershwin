@@ -107,7 +107,11 @@ public class RT {
         GERSHWIN_NS.importClass(STACK_CLASS_SYM, gershwin.lang.Stack.class);
         REFER.invoke(CLOJURE);
         load("gershwin/core");
+        // Here Clojure also tries to load a user.clj if it's available.
+
+        //
         // Example of creating a Word programmatically.
+        //
         // Clojure includes this for some reason in its RT.java, but then
         // calls Compiler.loadFile directly in src/clj/clojure/main.clj.
         // So I'm leaving it here for posterity, but I don't know why it's there.

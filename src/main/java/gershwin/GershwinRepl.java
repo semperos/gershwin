@@ -6,6 +6,7 @@ import gershwin.lang.Parser;
 import gershwin.lang.RT;
 import gershwin.lang.Stack;
 
+import clojure.lang.ISeq;
 import clojure.lang.LispReader;
 import clojure.lang.Namespace;
 import clojure.lang.SeqEnumeration;
@@ -43,15 +44,10 @@ public class GershwinRepl {
                 if (ch == 10) {
                     if(!firstPass) {
                         w.write("\n--- Data Stack:\n");
-                        // @todo See RT.java's printInnerSeq method for correct way
-                        //   to iterate through a seq
-                        SeqEnumeration iter = new SeqEnumeration(Stack.seq());
-                        while (iter.hasMoreElements()) {
-                            RT.print(iter.nextElement(), w);
-                            // w.write(iter.nextElement().toString());
+                        for (ISeq s = Stack.seq(); s != null; s = s.next()) {
+                            RT.print(s.first(), w);
                             w.write('\n');
                         }
-                        // w.write(Stack.seq().toString());
                         w.write('\n');
                         w.flush();
                     }

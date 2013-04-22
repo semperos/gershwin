@@ -19,6 +19,7 @@ import clojure.lang.LispReader;
 
 import java.io.IOException;
 import java.io.PushbackReader;
+import java.io.Reader;
 
 public class Parser {
     // *************** Copied because they're not public in LispReader ***************
@@ -85,6 +86,19 @@ public class Parser {
                     return new QuotationReader().invoke(r, (char) ch);
                 }
 
+                // This is where Clojure does a check against all special macro
+                // forms, invoking them and checking whether they return a meaningful
+                // value or just the Reader. The comment is an example of one that
+                // returns the Reader, so we just want to ignore it. Going to put
+                // the extra checks in here as a reminder about the more maintainable
+                // way of handling "macro" forms, into which ':' might also fall.
+                if(ch == '!') {
+                    Object ret = new CommentReader().invoke(r, (char) ch);
+                    if(ret == r)
+                        continue;
+                    return ret;
+                }
+
                 /**** End Gershwin extensions to Clojure reading ****/
                 // Everything else is just Clojure.
                 // System.out.println("Clojure Reader => " + (char) ch);
@@ -113,6 +127,17 @@ public class Parser {
             PushbackReader r = (PushbackReader) reader;
             return new QuotationList(LispReader.readDelimitedList('>', r, false));
         }
+    }
+
+    public static class CommentReader extends AFn {
+	public Object invoke(Object reader, Object bang) {
+            Reader r = (Reader) reader;
+            int ch;
+            do {
+                ch = LispReader.read1(r);
+            } while(ch != -1 && ch != '\n' && ch != '\r');
+            return r;
+	}
     }
 
     /**

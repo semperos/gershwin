@@ -125,7 +125,7 @@ public class RT {
                                return Compiler.loadFile((String) Stack.popIt());
                            }
                            catch(IOException e) {
-                               throw clojure.lang.Util.sneakyThrow(e);
+                               throw Util.sneakyThrow(e);
                            }
                        }
                    });

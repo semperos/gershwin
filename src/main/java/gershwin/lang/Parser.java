@@ -38,7 +38,7 @@ public class Parser {
             try {
                 r.unread(ch);
             } catch(IOException e) {
-                throw clojure.lang.Util.sneakyThrow(e);
+                throw Util.sneakyThrow(e);
             }
         }
     }
@@ -58,7 +58,7 @@ public class Parser {
 
                 if(ch == -1) {
                     if(eofIsError)
-                        throw clojure.lang.Util.runtimeException("EOF while reading");
+                        throw Util.runtimeException("EOF while reading");
                     return eofValue;
                 }
 
@@ -93,7 +93,7 @@ public class Parser {
             }
         } catch (Exception e) {
             if(isRecursive || !(r instanceof LineNumberingPushbackReader))
-                throw clojure.lang.Util.sneakyThrow(e);
+                throw Util.sneakyThrow(e);
             LineNumberingPushbackReader rdr = (LineNumberingPushbackReader) r;
             throw new ReaderException(rdr.getLineNumber(), rdr.getColumnNumber(), e);
         }

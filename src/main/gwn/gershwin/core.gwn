@@ -107,7 +107,9 @@
 
 : load-paths [ss --] (apply load (pop-it)) ;
 
-!! Shuffle words !!
+: clear [] (stack-void (Stack/clear)) ;
+
+! ## Shuffle words ##
 
 ! Basics are: drop, swap, dup, rot
 

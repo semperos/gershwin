@@ -23,6 +23,7 @@ public class RT {
     final static private IFn IN_NS = ClojureApi.var("clojure.core", "in-ns");
     final static private IFn REFER = ClojureApi.var("clojure.core", "refer");
     final static private Symbol STACK_CLASS_SYM = Symbol.intern("Stack");
+    final static private Symbol STACK_CLASS_EX_SYM = Symbol.intern("Stack$StackUnderflowException");
     final static private Symbol CLOJURE = Symbol.intern("clojure.core");
     final static private Symbol GERSHWIN = Symbol.intern("gershwin.core");
     final static private Namespace GERSHWIN_NS = Namespace.findOrCreate(GERSHWIN);
@@ -104,7 +105,8 @@ public class RT {
     public static void doInit() throws ClassNotFoundException, IOException {
         // clojure.lang.Compiler.eval(RT.list(IN_NS, GERSHWIN));
         IN_NS.invoke(GERSHWIN);
-        GERSHWIN_NS.importClass(STACK_CLASS_SYM, gershwin.lang.Stack.class);
+        GERSHWIN_NS.importClass(STACK_CLASS_SYM, Stack.class);
+        GERSHWIN_NS.importClass(STACK_CLASS_EX_SYM, Stack.StackUnderflowException.class);
         REFER.invoke(CLOJURE);
         load("gershwin/core");
         // Here Clojure also tries to load a user.clj if it's available.

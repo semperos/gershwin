@@ -27,8 +27,13 @@ public class Stack {
         return (IPersistentStack) stackAtom.deref();
     }
 
+    /**
+     * Like Clojure's peek, but throws an exception if the stack is empty.
+     */
     public static Object peek() {
         IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
+        if (rawStack.count() == 0)
+            throw new StackUnderflowException(STACK_UNDERFLOW_MSG);
         return rawStack.peek();
     }
 
@@ -69,6 +74,11 @@ public class Stack {
 
     public static IPersistentStack clear() {
         return (IPersistentStack) stackAtom.reset(PersistentVector.EMPTY);
+    }
+
+    public static int count() {
+        IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
+        return rawStack.count();
     }
 
     public static ISeq seq() {

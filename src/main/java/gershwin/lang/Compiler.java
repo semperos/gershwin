@@ -4,6 +4,9 @@ import clojure.lang.Fn;
 import clojure.lang.IFn;
 import clojure.lang.IObj;
 import clojure.lang.IPersistentCollection;
+import clojure.lang.IPersistentMap;
+import clojure.lang.IPersistentStack;
+import clojure.lang.PersistentHashMap;
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
 import clojure.lang.LispReader;
@@ -25,6 +28,27 @@ public class Compiler {
     static final String GERSHWIN_VAR_PREFIX = "__GWN__";
     static final Symbol DEF = Symbol.intern("def");
     static final Symbol FN = Symbol.intern("fn");
+    static final Symbol IF = Symbol.intern("if");
+
+    static final public IPersistentMap specials =
+        PersistentHashMap
+        .create(IF, new IfExpr.Parser());
+
+    /**
+     * Instead of having separate top-level {@code analyzeFoo}
+     * methods for every possible language form,
+     * {@code Expr} classes can contain an implemention
+     * of this interface to handle analysis of a specific
+     * language form.
+     *
+     * In this way, the implementation of parse becomes
+     * something of a "factory" method, handling the particulars
+     * of instantiating a particular kind of {@code Expr}.
+     */
+    interface IParser{
+	// Expr parse(C context, Object form) ;
+        Expr parse(Object form);
+    }
 
     interface Expr {
 	Object eval() ;
@@ -147,7 +171,9 @@ public class Compiler {
     }
 
     /**
-     * Word expr
+     * Word expr. This is the {@code Expr} used to handle a word
+     * when it is entered for evaluation. See {@link ColonExpr} for
+     * the case of defining a new word.
      *
      * @todo Make private
      */
@@ -168,6 +194,48 @@ public class Compiler {
         }
     }
 
+    public static class IfExpr implements Expr {
+        final Object condition;
+        final Quotation thenQuotation;
+        final Quotation elseQuotation;
+
+        public IfExpr(Object condition, Quotation thenQuotation, Quotation elseQuotation) {
+            this.condition = condition;
+            this.thenQuotation = thenQuotation;
+            this.elseQuotation = elseQuotation;
+        }
+
+        public Object eval() {
+            if(condition != null && condition != Boolean.FALSE)
+                return thenQuotation.invoke();
+            return elseQuotation.invoke();
+        }
+
+        static class Parser implements IParser {
+            /**
+             * Unlike in Clojure, these forms have already been
+             * analyzed and are on the stack in evaluated form, so there's
+             * no need to analyze these forms and create expr's again.
+             */
+            public Expr parse(Object form) {
+                IPersistentStack sCdr = Stack.pop();
+                IPersistentStack sCddr = sCdr.pop();
+                Object condition = sCddr.peek();
+                Object thenQ = sCdr.peek();
+                Object elseQ = Stack.peek();
+                if(!(thenQ instanceof Quotation)) {
+                    throw Util.runtimeException("The 'then' branch of an if expression must be a quotation.");
+                } else if(!(elseQ instanceof Quotation)) {
+                    throw Util.runtimeException("The 'else' branch of an if expression must be a quotation.");
+                }
+                // Easier to use immutable methods above and then just
+                // pop everything off the stack in one go.
+                for(int i = 0; i < 3; i++) { Stack.popIt(); }
+                return new IfExpr(condition, (Quotation) thenQ, (Quotation) elseQ);
+            }
+        }
+    }
+
     /**
      * Deal with a single language form.
      *
@@ -184,6 +252,7 @@ public class Compiler {
 
     // @todo Make private
     public static Expr analyze(Object form) {
+        IParser p;
         // System.out.println("ANALYZE FORM: " + form.getClass().getName() + ", " + form);
         // @todo Make interfaces for these if appropriate and use them for dispatch
         if(form instanceof ColonList) {
@@ -205,6 +274,9 @@ public class Compiler {
                 } else {
                     return new ClojureExpr(form);
                 }
+            } else if((p = (IParser) specials.valAt(form)) != null) {
+                // return p.parse(context, form);
+                return p.parse(form);
             } else {
                 return new ClojureExpr(form);
             }
@@ -223,9 +295,9 @@ public class Compiler {
      */
     public static Expr analyzeColon(ColonList form) {
         if (form.size() < 3) {
-            throw clojure.lang.Util.runtimeException("Too few arguments to ':'. You must include:\n\t(1) The name of the word\n\t(2) The intended stack effect of the word\n\t(3) The word definition.\n");
+            throw Util.runtimeException("Too few arguments to ':'. You must include:\n\t(1) The name of the word\n\t(2) The intended stack effect of the word\n\t(3) The word definition.\n");
         } else if(!(form.get(0) instanceof Symbol)) {
-            throw clojure.lang.Util.runtimeException("First argument to ':' must be a Symbol");
+            throw Util.runtimeException("First argument to ':' must be a Symbol");
         }
         return new ColonExpr(form);
     }

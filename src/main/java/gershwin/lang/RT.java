@@ -101,11 +101,12 @@ public class RT {
 	return Class.forName(name, true, baseLoader());
     }
 
-    public static void doInit() {
+    public static void doInit() throws ClassNotFoundException, IOException {
         // clojure.lang.Compiler.eval(RT.list(IN_NS, GERSHWIN));
         IN_NS.invoke(GERSHWIN);
         GERSHWIN_NS.importClass(STACK_CLASS_SYM, gershwin.lang.Stack.class);
         REFER.invoke(CLOJURE);
+        load("gershwin/core");
         // Example of creating a Word programmatically.
         // Clojure includes this for some reason in its RT.java, but then
         // calls Compiler.loadFile directly in src/clj/clojure/main.clj.
@@ -124,6 +125,7 @@ public class RT {
                            }
                        }
                    });
+
     }
 
     public static void print(Object x, Writer w) throws IOException {

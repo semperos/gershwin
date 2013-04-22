@@ -11,6 +11,7 @@ import clojure.lang.Namespace;
 import clojure.lang.SeqEnumeration;
 
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 /**
@@ -24,7 +25,7 @@ public class GershwinRepl {
         return ns.toString() + "> ";
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException, IOException {
 	LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in), 2);
 	OutputStreamWriter w = new OutputStreamWriter(System.out);
 	Object ret = null;

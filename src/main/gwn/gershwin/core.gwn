@@ -38,13 +38,13 @@
   (defn conj-it [x] (Stack/conjMutable x)))
 
 (stack-void
-  (defn pop1 [a-fn] (a-fn (pop-it))))
+  (defn apply-pop1 [a-fn] (a-fn (pop-it))))
 
 (stack-void
-  (defn pop2 [a-fn] (a-fn (pop-it) (pop-it))))
+  (defn apply-pop2 [a-fn] (a-fn (pop-it) (pop-it))))
 
 (stack-void
-  (defn pop3 [a-fn] (a-fn (pop-it) (pop-it) (pop-it))))
+  (defn apply-pop3 [a-fn] (a-fn (pop-it) (pop-it) (pop-it))))
 
 (stack-void
   (defn pop-n-swap2 [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a))))
@@ -184,6 +184,6 @@
 
 ! Basic math
 
-: + [n n -- n] (pop2 +) ;
+: + [n n -- n] (apply-pop2 +) ;
 
 : - [n n -- n] (pop-n-swap2 -) ;

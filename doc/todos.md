@@ -7,6 +7,7 @@
 ## Features ##
 
  * Enhance syntax of defining new words to allow associating metadata with the word
+ * Support Factor's backslash which allows putting a word on the stack, to be executed later like a quotation would (prevents need to create a quotation on top of a word, which is already like a quotation)
  * Reconsider how vars default back to Clojure ones if not present as Gershwin ones (likely to cause confusion)
  * Enhancements to Clojure interop for:
      - Turning regular Clojure functions into ones that use the data stack

@@ -107,11 +107,22 @@
 
 : load-paths [ss --] (apply load (pop-it)) ;
 
-! Shuffle words
+!! Shuffle words !!
 
-: . [x --] (do (pop-it) ::stack-void) ;
+! Basics are: drop, swap, dup, rot
+
+: drop [x --] (do (pop-it) ::stack-void) ;
+
+! Common synonym
+: . [x --] drop ;
+
+: swap [x y -- y x] (let [a (pop-it) b (pop-it)] (conj-it a) b) ;
 
 : dup [x -- x x] (let [a (pop-it)] (conj-it a) a) ;
+
+! @todo Will add warnings about using things like rot if/when
+!   we get Factor-style dataflow combinators implemented
+: rot [x y z -- y z x] (let [a (pop-it) b (pop-it) c (pop-it)] (conj-it b) (conj-it a) c) ;
 
 : invoke [] (do (.invoke (pop-it)) ::stack-void) ;
 

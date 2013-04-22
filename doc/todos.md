@@ -5,6 +5,7 @@
  * When defining a new word, print symbol 'ok' at the REPL
  * Implement custom print method in Gershwin's RT class
  * Implement 'if'
+ * Enhance syntax of defining new words to allow associating metadata with the word
  * Reconsider how vars default back to Clojure ones if not present as Gershwin ones (likely to cause confusion)
  * Enhancements to Clojure interop for:
      - Turning regular Clojure functions into ones that use the data stack

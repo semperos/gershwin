@@ -1,6 +1,9 @@
 (do
   ;; Functions and macros for common Clojure interop needs
-  (defmacro stack-void [& body] `(do ~@body ::stack-void))
+  (defmacro stack-void
+    "The keyword :gershwin.core/stack-void is a special value that the compiler will not put on the data stack. Use this to evaluate Clojure but to prevent the return value of the Clojure expression from being added to the stack."
+    [& body]
+    `(do ~@body ::stack-void))
   ::stack-void)
 
 (stack-void
@@ -22,6 +25,8 @@
   (defn pop-n-swap2 [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a))))
 
 (stack-void
+  ;; BEGIN Copying of Clojure's core.clj, to allow loading using
+  ;; Gershwin's loader instead of Clojure's.
   (defonce ^:dynamic
     ^{:private true
       :doc "A stack of paths currently being loaded by this thread"}
@@ -82,15 +87,17 @@
         (when-not (= path (first *pending-paths*))
           (binding [*pending-paths* (conj *pending-paths* path)]
             ;; This is the main departure from Clojure's load
-            (gershwin.lang.RT/load (.substring path 1))))))))
+            (gershwin.lang.RT/load (.substring path 1)))))))
+  ;; END Copying Clojure's core.clj
+  )
 
 : load [s --] (stack-void (load (pop-it))) ;
 
 : load-paths [ss --] (apply load (pop-it)) ;
 
-: . [n --] (do (pop-it) ::stack-void) ;
+: . [x --] (do (pop-it) ::stack-void) ;
 
-: dup [n -- n n] (let [a (pop-it)] (conj-it a) a) ;
+: dup [x -- x x] (let [a (pop-it)] (conj-it a) a) ;
 
 : invoke [] (do (.invoke (pop-it)) ::stack-void) ;
 

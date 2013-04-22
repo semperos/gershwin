@@ -19,8 +19,6 @@ import java.io.OutputStreamWriter;
  * Old-school debug REPL taken from commented-out Clojure main in LispReader
  */
 public class GershwinRepl {
-    // @todo This should be something like "user>" with gershwin.core having been
-    //   referred in.
     private static String formatPrompt() {
         Namespace ns = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
         return ns.toString() + "> ";
@@ -30,7 +28,6 @@ public class GershwinRepl {
 	LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in), 2);
 	OutputStreamWriter w = new OutputStreamWriter(System.out);
 	Object ret = null;
-        // @todo Work on how Stack operations themselves affect the stack (e.g., seq())
         RT.doInit();
         boolean firstPass = true;
 	try {

@@ -7,10 +7,10 @@ Gershwin is in early development. Take a look at `src/main/gwn/gershwin/core.gwn
 Run a REPL:
 
 ```
-mvn -Prepl package
+mvn -Prepl test
 ```
 
-Or just build the uberjar:
+Or build the uberjar:
 
 ```
 mvn package

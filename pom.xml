@@ -73,22 +73,6 @@
           </execution>
         </executions>
       </plugin>
-      <!-- <plugin> -->
-      <!--   <groupId>org.codehaus.mojo</groupId> -->
-      <!--   <artifactId>exec-maven-plugin</artifactId> -->
-      <!--   <version>1.2.1</version> -->
-      <!--   <executions> -->
-      <!--     <execution> -->
-      <!--       <phase>package</phase> -->
-      <!--       <goals> -->
-      <!--         <goal>java</goal> -->
-      <!--       </goals> -->
-      <!--     </execution> -->
-      <!--   </executions> -->
-      <!--   <configuration> -->
-      <!--     <mainClass>${gershwinMainClass}</mainClass> -->
-      <!--   </configuration> -->
-      <!-- </plugin> -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -134,7 +118,7 @@
             <executions>
               <execution>
                 <id>run-gershwin-main-class</id>
-                <phase>package</phase>
+                <phase>test</phase>
                 <goals>
                   <goal>run</goal>
                 </goals>

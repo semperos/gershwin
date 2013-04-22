@@ -26,6 +26,7 @@ import java.io.Reader;
 
 public class Compiler {
     static final String GERSHWIN_VAR_PREFIX = "__GWN__";
+    static final Keyword DOC_KEY = Keyword.intern(null, "doc");
     static final Symbol DEF = Symbol.intern("def");
     static final Symbol FN = Symbol.intern("fn");
     static final Symbol IF = Symbol.intern("if");
@@ -137,16 +138,20 @@ public class Compiler {
          * {@link Word}.
          */
         public Object eval() {
-            // System.out.println("COLON: " + l.getClass().getName() + ", " + (l instanceof ArrayList) + ", " + l);
             Symbol nameSym = (Symbol) this.l.get(0);
             Symbol gershwinName = Symbol.intern(GERSHWIN_VAR_PREFIX + nameSym.getName());
-            // System.out.println("COLON NAME IS: " + name);
+            String docString = null;
+            // Shorcut to add doc string
+            if (this.l.get(1) instanceof String) {
+                docString = (String) this.l.get(1);
+                this.l.remove(1);
+            }
             IPersistentCollection stackEffect = (IPersistentCollection) this.l.get(1);
             // System.out.println("COLON STACK EFFECT IS: " + stackEffect);
             List definition = this.l.subList(2, l.size());
             // System.out.println("COLON DEFINITION IS: " + definition);
             Word word = new Word(stackEffect, definition);
-            createVar(gershwinName, word);
+            createVar(gershwinName, word, docString);
             return word;
         }
     }
@@ -295,7 +300,7 @@ public class Compiler {
      */
     public static Expr analyzeColon(ColonList form) {
         if (form.size() < 3) {
-            throw Util.runtimeException("Too few arguments to ':'. You must include:\n\t(1) The name of the word\n\t(2) The intended stack effect of the word\n\t(3) The word definition.\n");
+            throw Util.runtimeException("Too few arguments to ':'. At a minimum, you must include:\n\t(1) The name of the word\n\t(2) The intended stack effect of the word\n\t(3) The word definition.\n");
         } else if(!(form.get(0) instanceof Symbol)) {
             throw Util.runtimeException("First argument to ':' must be a Symbol");
         }
@@ -354,13 +359,19 @@ public class Compiler {
         }
     }
 
+    public static void createVar(Symbol name, Object form) {
+        createVar(name, form, null);
+    }
     /**
      * Create a Clojure {@link clojure.lang.Var} and bind it
      * to {@code form}.
      */
-    public static void createVar(Symbol name, Object form) {
-        IObj newVar = (IObj) clojure.lang.RT.list(DEF, name, form);
-        clojure.lang.Compiler.eval(newVar, false);
+    public static void createVar(Symbol name, Object form, String docString) {
+        IObj varForm = (IObj) clojure.lang.RT.list(DEF, name, form);
+        Var newVar = (Var) clojure.lang.Compiler.eval(varForm, false);
+        if(docString != null) {
+            newVar.setMeta(clojure.lang.RT.map(DOC_KEY, docString));
+        }
         // ArrayList varParts = new ArrayList();
         // // Create fake var to prove concept
         // // See Nakkaya as reference, the definition of ":"

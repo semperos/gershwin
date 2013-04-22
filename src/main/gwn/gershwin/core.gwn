@@ -126,7 +126,7 @@
 
 ! Basics are: drop, swap, dup, rot
 
-: drop [x --] (do (pop-it) ::stack-void) ;
+: drop "Remove the item at the TOS." [x --] (do (pop-it) ::stack-void) ;
 
 ! Common synonym
 : . [x --] drop ;

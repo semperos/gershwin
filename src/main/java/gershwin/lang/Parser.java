@@ -115,7 +115,6 @@ public class Parser {
 
     public static class ColonReader extends AFn {
         public Object invoke(Object reader, Object colon) {
-            // System.out.println("COLON READER!");
             PushbackReader r = (PushbackReader) reader;
             return new ColonList(LispReader.readDelimitedList(';', r, false));
         }
@@ -123,7 +122,6 @@ public class Parser {
 
     public static class QuotationReader extends AFn {
         public Object invoke(Object reader, Object colon) {
-            // System.out.println("QUOTATION READER!");
             PushbackReader r = (PushbackReader) reader;
             return new QuotationList(LispReader.readDelimitedList('>', r, false));
         }

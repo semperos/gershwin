@@ -19,6 +19,12 @@
     (.println (System/out) msg)))
 
 (stack-void
+  (defn st-peek [] (Stack/peek)))
+
+(stack-void
+  (defn st-pop [] (Stack/pop)))
+
+(stack-void
   (defn pop-it [] (Stack/popIt)))
 
 (stack-void
@@ -120,13 +126,56 @@
 
 : swap [x y -- y x] (let [a (pop-it) b (pop-it)] (conj-it a) b) ;
 
-: dup [x -- x x] (let [a (pop-it)] (conj-it a) a) ;
+: dup [x -- x x] (st-peek) ;
 
 ! @todo Will add warnings about using things like rot if/when
 !   we get Factor-style dataflow combinators implemented
 : rot [x y z -- y z x] (let [a (pop-it) b (pop-it) c (pop-it)] (conj-it b) (conj-it a) c) ;
 
+! Factor extensions to base set
+
+! These include: drop2, drop3, nip, nip2, dup2, dup3, over, over2, pick
+! Note: 'pick' differs from what it might mean in most Forths
+! @todo Factor implements these as primitives, even though they could be implemented
+!   with the basic shuffle words above. Consider.
+
+: drop2 [x y --] drop drop ;
+
+: drop3 [x y z --] drop drop drop ;
+
+: nip [x y -- y] swap drop ;
+
+: nip2 [x y z -- z] swap drop swap drop ;
+
+: dup2 [x y -- x y x y]
+  (let [a (st-peek)
+        b (peek (st-pop))]
+    (conj-it b) a) ;
+
+: dup3 [x y z -- x y z x y z]
+  (let [cdr (st-pop)
+        cddr (pop cdr)
+        a (st-peek)
+        b (peek cdr)
+        c (peek cddr)]
+    (conj-it c) (conj-it b) a) ;
+
+: over [x y -- x y x] (peek (st-pop)) ;
+
+: over2 [x y z -- x y z x y]
+  (let [cdr (st-pop)
+        cddr (pop cdr)
+        b (peek cdr)
+        c (peek cddr)]
+    (conj-it c) b) ;
+
+: pick [x y z -- x y z x] (peek (pop (st-pop))) ;
+
+! Invokables
+
 : invoke [] (do (.invoke (pop-it)) ::stack-void) ;
+
+! Basic math
 
 : + [n n -- n] (pop2 +) ;
 

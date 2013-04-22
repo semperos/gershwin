@@ -339,7 +339,7 @@ public class Compiler {
             }
         }
 	catch(Parser.ReaderException e) {
-            throw new clojure.lang.Compiler.CompilerException(sourcePath, e.line, e.column, e.getCause());
+            throw new CompilerException(sourcePath, e.line, e.column, e.getCause());
         }
 	return ret;
     }
@@ -381,8 +381,28 @@ public class Compiler {
         // Object clojureForm = clojure.lang.Compiler.eval(list, false);
     }
 
-    public static Object resolveClojure(Symbol sym) {
-        // Namespace, symbol, allowPrivate
-        return clojure.lang.Compiler.resolveIn((Namespace) clojure.lang.RT.CURRENT_NS.deref(), sym, false);
+    // public static Object resolveClojure(Symbol sym) {
+    //     // Namespace, symbol, allowPrivate
+    //     return clojure.lang.Compiler.resolveIn((Namespace) clojure.lang.RT.CURRENT_NS.deref(), sym, false);
+    // }
+
+    static public class CompilerException extends RuntimeException {
+	final public String source;
+
+	final public int line;
+
+	public CompilerException(String source, int line, int column, Throwable cause) {
+            super(errorMsg(source, line, column, cause.toString()), cause);
+            this.source = source;
+            this.line = line;
+	}
+
+	public String toString(){
+            return getMessage();
+	}
+    }
+
+    static String errorMsg(String source, int line, int column, String s) {
+	return String.format("%s, compiling:(%s:%d:%d)", s, source, line, column);
     }
 }

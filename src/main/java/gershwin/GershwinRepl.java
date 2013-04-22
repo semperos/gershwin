@@ -7,6 +7,7 @@ import gershwin.lang.RT;
 import gershwin.lang.Stack;
 
 import clojure.lang.ISeq;
+import clojure.lang.Keyword;
 import clojure.lang.LispReader;
 import clojure.lang.Namespace;
 import clojure.lang.SeqEnumeration;
@@ -14,14 +15,33 @@ import clojure.lang.SeqEnumeration;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 /**
  * Old-school debug REPL taken from commented-out Clojure main in LispReader
  */
 public class GershwinRepl {
+    private static String formatLog(String msg) {
+        Namespace ns = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
+        return String.format("[%s] %s", ns.toString(), msg);
+    }
+
     private static String formatPrompt() {
         Namespace ns = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
         return ns.toString() + "> ";
+    }
+
+    private static void checkIfExit(Object form, Writer w) throws IOException {
+        Keyword exitKw = Keyword.intern("gershwin.core", "exit");
+        Keyword quitKw = Keyword.intern("gershwin.core", "quit");
+        if(form instanceof Keyword
+           && (form.equals(exitKw) || form.equals(quitKw))) {
+            w.write("\n");
+            w.write(formatLog("Exiting Gershwin REPL."));
+            w.write("\n\n");
+            w.flush();
+            System.exit(0);
+        }
     }
 
     public static void main(String[] args) throws ClassNotFoundException, IOException {
@@ -54,6 +74,7 @@ public class GershwinRepl {
                     r.unread(ch);
                 }
                 ret = Parser.read(r, true, null, false);
+                checkIfExit(ret, w);
                 Compiler.eval(ret);
             }
         }

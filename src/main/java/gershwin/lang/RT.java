@@ -19,7 +19,7 @@ import java.util.List;
 
 public class RT {
     final static private String GERSHWIN_PREFIX = "__GWN__";
-    final static Symbol LOAD_FILE = Symbol.intern(GERSHWIN_PREFIX + "load-file");
+    final static Symbol LOAD_FILE = Symbol.intern(formatGershwinName("load-file"));
     final static private IFn IN_NS = ClojureApi.var("clojure.core", "in-ns");
     final static private IFn REFER = ClojureApi.var("clojure.core", "refer");
     final static private Symbol STACK_CLASS_SYM = Symbol.intern("Stack");
@@ -30,6 +30,10 @@ public class RT {
 
     public static Charset UTF8 = Charset.forName("UTF-8");
     public final static Keyword STACK_VOID = Keyword.intern("gershwin.core", "stack-void");
+
+    public static String formatGershwinName(String name) {
+        return GERSHWIN_PREFIX + name;
+    }
 
     public static void loadResourceScript(String name) throws IOException {
 	loadResourceScript(name, true);

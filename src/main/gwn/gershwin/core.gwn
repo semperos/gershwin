@@ -7,6 +7,13 @@
   ::stack-void)
 
 (stack-void
+  (defn gershwin-var
+    "Resolve the `name` of a Gershwin language form as a var. Gershwin does some mangling of names to prevent clashes with core Clojure forms, so this replicates that."
+    [s]
+    (-> (gershwin.lang.RT/formatGershwinName (name s))
+        symbol resolve)))
+
+(stack-void
   (defn print*
     "@todo Research why default print disappears"
     [msg]

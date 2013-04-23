@@ -150,6 +150,7 @@ public class RT {
             w.write(" >");
         } else {
             clojure.lang.RT.print(x, w);
+            w.flush();
         }
     }
 

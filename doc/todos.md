@@ -2,7 +2,7 @@
 
 ## Bugs ##
 
- * Use of immutable methods on Stack returns `nil` instead of throwing exceptions for stack underflow -- needs to throw exception
+ * I'm sure there are plenty...
 
 ## Features ##
 
@@ -21,6 +21,8 @@
 
 ## Done ##
 
+ * [DONE] Add special invoke word to invoke Clojure keywords, so they act like specialized quotations.
+ * [DONE] Use of immutable methods on Stack returns `nil` instead of throwing exceptions for stack underflow -- needs to throw exception
  * [DONE] Implement 'if'
  * [DONE] Allow Factor-style comments with '!'
  * [DONE] Implement custom print method in Gershwin's RT class

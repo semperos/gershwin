@@ -27,6 +27,7 @@ import java.io.Reader;
 public class Compiler {
     static final String GERSHWIN_VAR_PREFIX = "__GWN__";
     static final Keyword DOC_KEY = Keyword.intern(null, "doc");
+    static final Keyword STACK_EFFECT_KEY = Keyword.intern(null, "stack-effect");
     static final Symbol DEF = Symbol.intern("def");
     static final Symbol FN = Symbol.intern("fn");
     static final Symbol IF = Symbol.intern("if");
@@ -155,11 +156,11 @@ public class Compiler {
             List definition = this.l.subList(2, l.size());
             Word word = new Word(stackEffect, definition);
             if(wordMeta != null) {
-                createVar(gershwinName, word, wordMeta);
+                createVar(gershwinName, word, wordMeta.assoc(STACK_EFFECT_KEY, stackEffect));
             } else if(docString != null) {
-                createVar(gershwinName, word, docString);
+                createVar(gershwinName, word, docString, clojure.lang.RT.map(STACK_EFFECT_KEY, stackEffect));
             } else {
-                createVar(gershwinName, word);
+                createVar(gershwinName, word, clojure.lang.RT.map());
             }
             return word;
         }
@@ -368,10 +369,6 @@ public class Compiler {
         }
     }
 
-    public static void createVar(Symbol name, Object form) {
-        createVar(name, form, null);
-    }
-
     /**
      * If meta-data is passed in, we assume form is an IObj, which allows
      * adding meta-data to itself.
@@ -382,8 +379,8 @@ public class Compiler {
      * {@link clojure.lang.IObj} like {@link Word}
      */
     public static void createVar(Symbol name, IObj form, IPersistentMap formMeta) {
-        IObj formWithMeta = form.withMeta(formMeta);
-        IObj varForm = (IObj) clojure.lang.RT.list(DEF, name, formWithMeta);
+        // IObj formWithMeta = form.withMeta(formMeta);
+        IObj varForm = (IObj) clojure.lang.RT.list(DEF, name, form);
         Var newVar = (Var) clojure.lang.Compiler.eval(varForm, false);
         if(formMeta != null) {
             newVar.setMeta(formMeta);
@@ -394,11 +391,11 @@ public class Compiler {
      * Create a Clojure {@link clojure.lang.Var} and bind it
      * to {@code form}.
      */
-    public static void createVar(Symbol name, Object form, String docString) {
+    public static void createVar(Symbol name, Object form, String docString, IPersistentMap formMeta) {
         IObj varForm = (IObj) clojure.lang.RT.list(DEF, name, form);
         Var newVar = (Var) clojure.lang.Compiler.eval(varForm, false);
         if(docString != null) {
-            newVar.setMeta(clojure.lang.RT.map(DOC_KEY, docString));
+            newVar.setMeta(formMeta.assoc(DOC_KEY, docString));
         }
     }
 

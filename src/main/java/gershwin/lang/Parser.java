@@ -20,6 +20,8 @@ import clojure.lang.LispReader;
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Parser {
     // *************** Copied because they're not public in LispReader ***************
@@ -116,6 +118,7 @@ public class Parser {
     public static class ColonReader extends AFn {
         public Object invoke(Object reader, Object colon) {
             PushbackReader r = (PushbackReader) reader;
+            // @todo Check that our readDelimitedList works for this and replace
             return new ColonList(LispReader.readDelimitedList(';', r, false));
         }
     }
@@ -123,7 +126,7 @@ public class Parser {
     public static class QuotationReader extends AFn {
         public Object invoke(Object reader, Object colon) {
             PushbackReader r = (PushbackReader) reader;
-            return new QuotationList(LispReader.readDelimitedList('>', r, false));
+            return new QuotationList(readDelimitedList('>', r, false));
         }
     }
 
@@ -136,6 +139,43 @@ public class Parser {
             } while(ch != -1 && ch != '\n' && ch != '\r');
             return r;
 	}
+    }
+
+    public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive) {
+	final int firstline =
+            (r instanceof LineNumberingPushbackReader) ?
+            ((LineNumberingPushbackReader) r).getLineNumber() : -1;
+
+	ArrayList a = new ArrayList();
+
+	for(; ;) {
+            int ch = LispReader.read1(r);
+
+            while(isWhitespace(ch))
+                ch = LispReader.read1(r);
+
+            if(ch == -1) {
+                if(firstline < 0)
+                    throw Util.runtimeException("EOF while reading");
+                else
+                    throw Util.runtimeException("EOF while reading, starting at line " + firstline);
+            }
+
+            if(ch == delim) {
+                break;
+            } else {
+                // Just before here, Clojure checks explicitly for getMacro, even though
+                // this else follows, which defers to the main read method which
+                // also performs that check, so not sure why it was duplicated here.
+                unread(r, ch);
+                Object o = read(r, true, null, isRecursive);
+                if(o != r)
+                    a.add(o);
+            }
+        }
+
+
+	return a;
     }
 
     /**

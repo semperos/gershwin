@@ -144,6 +144,10 @@ public class RT {
             w.write("< ");
             printInnerList(q.getQuotationForms(), w);
             w.write(" >");
+        } else if(x instanceof QuotationList) {
+            w.write("< ");
+            printInnerList((List) x, w);
+            w.write(" >");
         } else {
             clojure.lang.RT.print(x, w);
         }

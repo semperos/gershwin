@@ -7,14 +7,14 @@
   ::stack-void)
 
 (stack-void
-  (defn gershwin-resolve
-    "Resolve the `name` of a Gershwin language form as a var. Gershwin does some mangling of names to prevent clashes with core Clojure forms, so this replicates that."
-    [s]
-    (let [vr (resolve (symbol s))]
-      (if vr
-        vr
-        (-> s name gershwin.lang.RT/formatGershwinName
-            symbol resolve)))))
+ (defn gershwin-resolve
+   "Resolve the `name` of a Gershwin language form as a var. Gershwin does some mangling of names to prevent clashes with core Clojure forms, so this replicates that."
+   [s]
+   (let [vr (resolve (symbol s))]
+     (if vr
+       vr
+       (-> s name gershwin.lang.RT/formatGershwinName
+           symbol resolve)))))
 
 (stack-void
  (defn gershwin-var
@@ -23,132 +23,132 @@
        symbol resolve)))
 
 (stack-void
-  (defn print*
-    [msg]
-    (print msg)
-    (.flush *out*)))
+ (defn print*
+   [msg]
+   (print msg)
+   (.flush *out*)))
 
 (stack-void
-  (defn println*
-    [msg]
-    (println msg)
-    (.flush *out*)))
+ (defn println*
+   [msg]
+   (println msg)
+   (.flush *out*)))
 
 (stack-void
-  (defn pr*
-    "@todo Even though clojure.lang.RT seems to print out readable forms, Clojure does all the work of pr/prn in core_print.clj, so this function (pr*) should be changed to handle the couple of Gershwin cases here and then defer to Clojure's pr function, instead of this current implementation which uses Gershwin's RT/print which defers to Clojure's RT/print."
-    [x]
-    (gershwin.lang.RT/print x *out*)))
+ (defn pr*
+   "@todo Even though clojure.lang.RT seems to print out readable forms, Clojure does all the work of pr/prn in core_print.clj, so this function (pr*) should be changed to handle the couple of Gershwin cases here and then defer to Clojure's pr function, instead of this current implementation which uses Gershwin's RT/print which defers to Clojure's RT/print."
+   [x]
+   (gershwin.lang.RT/print x *out*)))
 
 (stack-void
-  (defn prn*
-    [x]
-    (gershwin.lang.RT/print x *out*)
-    (.write *out* "\n")
-    (.flush *out*)))
+ (defn prn*
+   [x]
+   (gershwin.lang.RT/print x *out*)
+   (.write *out* "\n")
+   (.flush *out*)))
 
 (stack-void
-  (defn st-peek [] (Stack/peek)))
+ (defn st-peek [] (Stack/peek)))
 
 (stack-void
-  (defn peek* [coll]
-    "Like Clojure's peek, but throws an exception if the stack is empty."
-    (if (zero? (count coll))
-      (throw (Stack$StackUnderflowException. "Data stack underflow. Can't take something off an empty data stack."))
-      (peek coll))))
+ (defn peek* [coll]
+   "Like Clojure's peek, but throws an exception if the stack is empty."
+   (if (zero? (count coll))
+     (throw (Stack$StackUnderflowException. "Data stack underflow. Can't take something off an empty data stack."))
+     (peek coll))))
 
 (stack-void
-  (defn st-pop [] (Stack/pop)))
+ (defn st-pop [] (Stack/pop)))
 
 (stack-void
-  (defn pop-it [] (Stack/popIt)))
+ (defn pop-it [] (Stack/popIt)))
 
 (stack-void
-  (defn conj-it [x] (Stack/conjMutable x)))
+ (defn conj-it [x] (Stack/conjMutable x)))
 
 (stack-void
-  (defn apply-pop1 [a-fn] (a-fn (pop-it))))
+ (defn apply-pop1 [a-fn] (a-fn (pop-it))))
 
 (stack-void
-  (defn apply-pop2 [a-fn] (a-fn (pop-it) (pop-it))))
+ (defn apply-pop2 [a-fn] (a-fn (pop-it) (pop-it))))
 
 (stack-void
-  (defn apply-pop3 [a-fn] (a-fn (pop-it) (pop-it) (pop-it))))
+ (defn apply-pop3 [a-fn] (a-fn (pop-it) (pop-it) (pop-it))))
 
 (stack-void
-  (defn pop-n-swap2 [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a))))
+ (defn pop-n-swap2 [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a))))
 
 (stack-void
-  ;; BEGIN Copying of Clojure's core.clj, to allow loading using
-  ;; Gershwin's loader instead of Clojure's.
-  (defonce ^:dynamic
-    ^{:private true
-      :doc "A stack of paths currently being loaded by this thread"}
-    *pending-paths* ()))
+ ;; BEGIN Copying of Clojure's core.clj, to allow loading using
+ ;; Gershwin's loader instead of Clojure's.
+ (defonce ^:dynamic
+   ^{:private true
+     :doc "A stack of paths currently being loaded by this thread"}
+   *pending-paths* ()))
 
 (stack-void
-  (defonce ^:dynamic
-    ^{:private true :doc "True while a verbose load is pending"}
-    *loading-verbosely* false))
+ (defonce ^:dynamic
+   ^{:private true :doc "True while a verbose load is pending"}
+   *loading-verbosely* false))
 
 (stack-void
-  (defn- check-cyclic-dependency
-    "Detects and rejects non-trivial cyclic load dependencies. The
+ (defn- check-cyclic-dependency
+   "Detects and rejects non-trivial cyclic load dependencies. The
     exception message shows the dependency chain with the cycle
     highlighted. Ignores the trivial case of a file attempting to load
     itself because that can occur when a gen-class'd class loads its
     implementation."
-    [path]
-    (when (some #{path} (rest *pending-paths*))
-      (let [pending (map #(if (= % path) (str "[ " % " ]") %)
-                         (cons path *pending-paths*))
-            chain (apply str (interpose "->" pending))]
-        (throw (Exception. (str "Cyclic load dependency: " chain)))))))
+   [path]
+   (when (some #{path} (rest *pending-paths*))
+     (let [pending (map #(if (= % path) (str "[ " % " ]") %)
+                        (cons path *pending-paths*))
+           chain (apply str (interpose "->" pending))]
+       (throw (Exception. (str "Cyclic load dependency: " chain)))))))
 
 (stack-void
-  (defn- root-resource
-    "Returns the root directory path for a lib"
-    {:tag String}
-    [lib]
-    (str \/
-         (.. (name lib)
-             (replace \- \_)
-             (replace \. \/)))))
+ (defn- root-resource
+   "Returns the root directory path for a lib"
+   {:tag String}
+   [lib]
+   (str \/
+        (.. (name lib)
+            (replace \- \_)
+            (replace \. \/)))))
 
 (stack-void
-  (defn- root-directory
-    "Returns the root resource path for a lib"
-    [lib]
-    (let [d (root-resource lib)]
-      (subs d 0 (.lastIndexOf d "/")))))
+ (defn- root-directory
+   "Returns the root resource path for a lib"
+   [lib]
+   (let [d (root-resource lib)]
+     (subs d 0 (.lastIndexOf d "/")))))
 
 (stack-void
-  ;; need root-directory
-  (defn load
-    "Loads Clojure code from resources in classpath. A path is interpreted as
+ ;; need root-directory
+ (defn load
+   "Loads Clojure code from resources in classpath. A path is interpreted as
     classpath-relative if it begins with a slash or relative to the root
     directory for the current namespace otherwise."
-    {:added "1.0"}
-    [& paths]
-    (doseq [^String path paths]
-      (let [^String path (if (.startsWith path "/")
-                             path
-                             (str (root-directory (ns-name *ns*)) \/ path))]
-        (when *loading-verbosely*
-          (printf "(clojure.core/load \"%s\")\n" path)
-          (flush))
-        (check-cyclic-dependency path)
-        (when-not (= path (first *pending-paths*))
-          (binding [*pending-paths* (conj *pending-paths* path)]
-            ;; This is the main departure from Clojure's load
-            (gershwin.lang.RT/load (.substring path 1)))))))
-  ;; END Copying Clojure's core.clj
-  )
+   {:added "1.0"}
+   [& paths]
+   (doseq [^String path paths]
+     (let [^String path (if (.startsWith path "/")
+                          path
+                          (str (root-directory (ns-name *ns*)) \/ path))]
+       (when *loading-verbosely*
+         (printf "(clojure.core/load \"%s\")\n" path)
+         (flush))
+       (check-cyclic-dependency path)
+       (when-not (= path (first *pending-paths*))
+         (binding [*pending-paths* (conj *pending-paths* path)]
+           ;; This is the main departure from Clojure's load
+           (gershwin.lang.RT/load (.substring path 1)))))))
+ ;; END Copying Clojure's core.clj
+ )
 
 ! ## Invokables ##
 
 ! @todo Clarify use of stack-void here
-: invoke [x -- ?] (stack-void (.invoke (pop-it)))  ;
+: invoke [x -- ?] (stack-void (.invoke (pop-it))) ;
 
 : invoke2 [x y -- ?]
   (.invoke (pop-it) (pop-it)) ;

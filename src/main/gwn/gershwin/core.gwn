@@ -123,11 +123,34 @@
   ;; END Copying Clojure's core.clj
   )
 
+! ## Invokables ##
+
+! @todo Clarify use of stack-void here
+: invoke [x -- ?] (stack-void (.invoke (pop-it)))  ;
+
+: invoke2 [x y -- ?]
+  (.invoke (pop-it) (pop-it)) ;
+
+! ## Code loading ##
+
 : load [s --] (stack-void (load (pop-it))) ;
 
 : load-paths [ss --] (apply load (pop-it)) ;
 
+! ## Utilities ##
+
 : clear [] (stack-void (Stack/clear)) ;
+
+: print [n --] (stack-void (print* (pop-it))) ;
+
+: println [n --] (stack-void (println* (pop-it))) ;
+
+: meta {:added "initial" :doc "Get metadata for a Gershwin word with the given name"}
+  [x -- y]
+  (meta (gershwin-var (pop-it))) ;
+
+: print-doc "Print documentation metadata for a Gershwin word with the given name" [n --]
+  meta :doc invoke2 println ;
 
 ! ## Shuffle words ##
 
@@ -184,10 +207,6 @@
     (conj-it c) b) ;
 
 : pick [x y z -- x y z x] (peek* (pop (st-pop))) ;
-
-! Invokables
-
-: invoke [] (do (.invoke (pop-it)) ::stack-void) ;
 
 ! Basic math
 

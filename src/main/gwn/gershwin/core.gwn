@@ -24,15 +24,28 @@
 
 (stack-void
   (defn print*
-    "@todo Research why default print disappears"
     [msg]
-    (.print (System/out) msg)))
+    (print msg)
+    (.flush *out*)))
 
 (stack-void
   (defn println*
-    "@todo Research why default println disappears"
     [msg]
-    (.println (System/out) msg)))
+    (println msg)
+    (.flush *out*)))
+
+(stack-void
+  (defn pr*
+    "@todo Even though clojure.lang.RT seems to print out readable forms, Clojure does all the work of pr/prn in core_print.clj, so this function (pr*) should be changed to handle the couple of Gershwin cases here and then defer to Clojure's pr function, instead of this current implementation which uses Gershwin's RT/print which defers to Clojure's RT/print."
+    [x]
+    (gershwin.lang.RT/print x *out*)))
+
+(stack-void
+  (defn prn*
+    [x]
+    (gershwin.lang.RT/print x *out*)
+    (.write *out* "\n")
+    (.flush *out*)))
 
 (stack-void
   (defn st-peek [] (Stack/peek)))
@@ -149,6 +162,10 @@
 ! ## Utilities ##
 
 : clear [] (stack-void (Stack/clear)) ;
+
+: pr [n --] (stack-void (pr* (pop-it))) ;
+
+: prn [n --] (stack-void (prn* (pop-it))) ;
 
 : print [n --] (stack-void (print* (pop-it))) ;
 

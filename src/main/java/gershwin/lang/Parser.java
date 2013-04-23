@@ -119,14 +119,14 @@ public class Parser {
         public Object invoke(Object reader, Object colon) {
             PushbackReader r = (PushbackReader) reader;
             // @todo Check that our readDelimitedList works for this and replace
-            return new ColonList(LispReader.readDelimitedList(';', r, false));
+            return new ColonList(LispReader.readDelimitedList(';', r, true));
         }
     }
 
     public static class QuotationReader extends AFn {
         public Object invoke(Object reader, Object colon) {
             PushbackReader r = (PushbackReader) reader;
-            return new QuotationList(readDelimitedList('>', r, false));
+            return new QuotationList(readDelimitedList('>', r, true));
         }
     }
 

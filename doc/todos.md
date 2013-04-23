@@ -9,14 +9,17 @@
  * AOT compilation -- likely first pass will be Clojure source output -> AOT-compile that, only need to handle custom output for words, quotations, and then of course recursively output body definitions of words, which will eventually work down to Clojure code.
  * Support Factor's backslash which allows putting a word on the stack, to be executed later like a quotation would (prevents need to create a quotation on top of a word, which is already like a quotation)
  * Reconsider how vars default back to Clojure ones if not present as Gershwin ones (likely to cause confusion)
- * Enhancements to Clojure interop for:
-     - Turning regular Clojure functions into ones that use the data stack
-     - Capturing the (do ... :gershwin.core/stack-void) to prevent a Clojure expression's value from making it onto the data stack.
  * [ONGOING] Hide compiler details in Gershwin's RT class (make a survey of what Clojure's does)
 
 ## Maybe's ##
 
  * Allow identifiers that start with numbers, like Factor (name-munging)
+
+## Probably Not's ##
+
+**Use (:arglists (meta #'a-var)) to auto-transform Clojure functions to Gershwin words**
+
+At first glance, this seems like a interesting prospect to avoid a lot of menial transformation work, but in reality, dealing with (1) multiple arities per function, (2) rest args, (3) destructuring, and (4) argument order differences, it's not worth the implicitness/uncertainty that would certainly accompany such a feature.
 
 ## Done ##
 

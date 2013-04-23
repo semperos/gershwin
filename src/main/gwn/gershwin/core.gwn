@@ -7,11 +7,20 @@
   ::stack-void)
 
 (stack-void
-  (defn gershwin-var
+  (defn gershwin-resolve
     "Resolve the `name` of a Gershwin language form as a var. Gershwin does some mangling of names to prevent clashes with core Clojure forms, so this replicates that."
     [s]
-    (-> (gershwin.lang.RT/formatGershwinName (name s))
-        symbol resolve)))
+    (let [vr (resolve (symbol s))]
+      (if vr
+        vr
+        (-> s name gershwin.lang.RT/formatGershwinName
+            symbol resolve)))))
+
+(stack-void
+ (defn gershwin-var
+   [s]
+   (-> s name gershwin.lang.RT/formatGershwinName
+       symbol resolve)))
 
 (stack-void
   (defn print*
@@ -145,9 +154,21 @@
 
 : println [n --] (stack-void (println* (pop-it))) ;
 
-: meta {:added "initial" :doc "Get metadata for a Gershwin word with the given name"}
+: meta {:added "initial" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
   [x -- y]
-  (meta (gershwin-var (pop-it))) ;
+  (meta (pop-it)) ;
+
+: symbol "Coerce TOS to a symbol"
+  [x -- y]
+  (symbol (pop-it)) ;
+
+: var "Get var for TOS. Currently uses `resolve` as `var` causes an error."
+  [x -- y]
+  (gershwin-resolve (pop-it)) ;
+
+: gershwin-var "For vars that share names between Gershwin words and Clojure functions, this removes the ambiguity and attempts to resolve the item as a Gershwin word var."
+  [x -- y]
+  (gershwin-var (pop-it)) ;
 
 : print-doc "Print documentation metadata for a Gershwin word with the given name" [n --]
   meta :doc invoke2 println ;

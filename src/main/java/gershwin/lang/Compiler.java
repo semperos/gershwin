@@ -140,18 +140,27 @@ public class Compiler {
         public Object eval() {
             Symbol nameSym = (Symbol) this.l.get(0);
             Symbol gershwinName = Symbol.intern(GERSHWIN_VAR_PREFIX + nameSym.getName());
+            IPersistentMap wordMeta = null;
             String docString = null;
-            // Shorcut to add doc string
-            if (this.l.get(1) instanceof String) {
+            if (this.l.get(1) instanceof IPersistentMap) {
+                // Shortcut to add metadata
+                wordMeta = (IPersistentMap) this.l.get(1);
+                this.l.remove(1);
+            } else if (this.l.get(1) instanceof String) {
+                // Shortcut to add a docstring
                 docString = (String) this.l.get(1);
                 this.l.remove(1);
             }
             IPersistentCollection stackEffect = (IPersistentCollection) this.l.get(1);
-            // System.out.println("COLON STACK EFFECT IS: " + stackEffect);
             List definition = this.l.subList(2, l.size());
-            // System.out.println("COLON DEFINITION IS: " + definition);
             Word word = new Word(stackEffect, definition);
-            createVar(gershwinName, word, docString);
+            if(wordMeta != null) {
+                createVar(gershwinName, word, wordMeta);
+            } else if(docString != null) {
+                createVar(gershwinName, word, docString);
+            } else {
+                createVar(gershwinName, word);
+            }
             return word;
         }
     }
@@ -362,6 +371,25 @@ public class Compiler {
     public static void createVar(Symbol name, Object form) {
         createVar(name, form, null);
     }
+
+    /**
+     * If meta-data is passed in, we assume form is an IObj, which allows
+     * adding meta-data to itself.
+     *
+     * For now, going to put meta-data on the {@link clojure.lang.Var}, since that
+     * seems to be the trend, though I confess not understanding all the ramifications.
+     * Will leave commented-out line for adding it directly to a custom
+     * {@link clojure.lang.IObj} like {@link Word}
+     */
+    public static void createVar(Symbol name, IObj form, IPersistentMap formMeta) {
+        IObj formWithMeta = form.withMeta(formMeta);
+        IObj varForm = (IObj) clojure.lang.RT.list(DEF, name, formWithMeta);
+        Var newVar = (Var) clojure.lang.Compiler.eval(varForm, false);
+        if(formMeta != null) {
+            newVar.setMeta(formMeta);
+        }
+    }
+
     /**
      * Create a Clojure {@link clojure.lang.Var} and bind it
      * to {@code form}.
@@ -372,32 +400,9 @@ public class Compiler {
         if(docString != null) {
             newVar.setMeta(clojure.lang.RT.map(DOC_KEY, docString));
         }
-        // ArrayList varParts = new ArrayList();
-        // // Create fake var to prove concept
-        // // See Nakkaya as reference, the definition of ":"
-        // // replaces the word definition with a Clojure function that
-        // // doseq's its way through the words in a new word definition,
-        // // eval'ing them alon the way.
-        // //
-        // // clojure.lang.RT.list(FN, PersistentVector.EMPTY, l)
-        // // for(; i < l.size(); i++) {
-        // //     Object aForm = l.get(i);
-        // //     varParts.add(eval())
-        // // }
-        // clojure.lang.RT.list(DEF, name, clojure.lang.RT.list(FN, PersistentVector.EMPTY, l));
-        // varParts.add(DEF);
-        // varParts.add(name);
-        // varParts.add(form);
-        // IObj list = (IObj) PersistentList.create(varParts);
-        // Object clojureForm = clojure.lang.Compiler.eval(list, false);
     }
 
-    // public static Object resolveClojure(Symbol sym) {
-    //     // Namespace, symbol, allowPrivate
-    //     return clojure.lang.Compiler.resolveIn((Namespace) clojure.lang.RT.CURRENT_NS.deref(), sym, false);
-    // }
-
-    static public class CompilerException extends RuntimeException {
+    public static class CompilerException extends RuntimeException {
 	final public String source;
 
 	final public int line;

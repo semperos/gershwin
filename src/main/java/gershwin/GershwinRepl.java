@@ -53,7 +53,7 @@ public class GershwinRepl {
     }
 
     public static void main(String[] args) throws ClassNotFoundException, IOException {
-	LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in), 2);
+	LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in));
 	OutputStreamWriter w = new OutputStreamWriter(System.out);
 	Object readRet = null;
         Object evalRet = null;

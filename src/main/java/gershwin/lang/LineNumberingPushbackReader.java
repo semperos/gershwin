@@ -29,8 +29,14 @@ public class LineNumberingPushbackReader extends PushbackReader{
     private boolean _prev;
     private int _columnNumber = 1;
 
+    private int _bufferSize;
+
+    /**
+     * Gershwin requires a buffer size of 2, so it's the new default.
+     */
     public LineNumberingPushbackReader(Reader r){
-	super(new LineNumberReader(r));
+	super(new LineNumberReader(r, 2), 2);
+        this._bufferSize = 2;
     }
 
     /**
@@ -44,6 +50,11 @@ public class LineNumberingPushbackReader extends PushbackReader{
      */
     public LineNumberingPushbackReader(Reader r, int size){
 	super(new LineNumberReader(r, size), size);
+        this._bufferSize = size;
+    }
+
+    public int getBufferSize() {
+        return this._bufferSize;
     }
 
     public int getLineNumber(){

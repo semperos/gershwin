@@ -1,6 +1,8 @@
 package gershwin.lang;
 
+import clojure.lang.IObj;
 import clojure.lang.IPersistentCollection;
+import clojure.lang.IPersistentMap;
 
 import java.util.Iterator;
 import java.util.List;
@@ -12,9 +14,10 @@ import java.util.List;
  * itself will consist of other words and primitives (Clojure/Java)
  * that need to be recursively evaluated until executable code is found.
  */
-public class Word implements IInvokable {
+public class Word implements IInvokable, IObj {
     private final IPersistentCollection stackEffect;
     private final List definitionForms;
+    private final IPersistentMap _meta;
 
     /**
      * Word definitions created programmatically don't require the usual.
@@ -22,6 +25,7 @@ public class Word implements IInvokable {
     public Word() {
         this.stackEffect = null;
         this.definitionForms = null;
+        this._meta = null;
     }
 
     /**
@@ -38,6 +42,13 @@ public class Word implements IInvokable {
     public Word(IPersistentCollection stackEffect, List definitionForms) {
         this.stackEffect = stackEffect;
         this.definitionForms = definitionForms;
+        this._meta = null;
+    }
+
+    public Word(IPersistentMap meta, IPersistentCollection stackEffect, List definitionForms) {
+        this.stackEffect = stackEffect;
+        this.definitionForms = definitionForms;
+        this._meta = meta;
     }
 
     /**
@@ -50,6 +61,14 @@ public class Word implements IInvokable {
             ret = Compiler.eval(iter.next());
         }
         return ret;
+    }
+
+    public IObj withMeta(IPersistentMap meta){
+	return new Word(meta, stackEffect, definitionForms);
+    }
+
+    public IPersistentMap meta(){
+	return _meta;
     }
 
 }

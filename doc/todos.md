@@ -7,7 +7,6 @@
 ## Features ##
 
  * AOT compilation -- likely first pass will be Clojure source output -> AOT-compile that, only need to handle custom output for words, quotations, and then of course recursively output body definitions of words, which will eventually work down to Clojure code.
- * Enhance syntax of defining new words to allow associating metadata with the word
  * Support Factor's backslash which allows putting a word on the stack, to be executed later like a quotation would (prevents need to create a quotation on top of a word, which is already like a quotation)
  * Reconsider how vars default back to Clojure ones if not present as Gershwin ones (likely to cause confusion)
  * Enhancements to Clojure interop for:
@@ -21,6 +20,7 @@
 
 ## Done ##
 
+ * [DONE] Enhance syntax of defining new words to allow associating metadata with the word
  * [DONE] Add special invoke word to invoke Clojure keywords, so they act like specialized quotations.
  * [DONE] Use of immutable methods on Stack returns `nil` instead of throwing exceptions for stack underflow -- needs to throw exception
  * [DONE] Implement 'if'

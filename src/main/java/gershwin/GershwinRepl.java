@@ -8,6 +8,7 @@ import gershwin.lang.Stack;
 
 import clojure.lang.ISeq;
 import clojure.lang.Keyword;
+import clojure.lang.LazySeq;
 import clojure.lang.LispReader;
 import clojure.lang.Namespace;
 import clojure.lang.SeqEnumeration;
@@ -70,7 +71,13 @@ public class GershwinRepl {
                     if(!firstPass) {
                         w.write("\n--- Data Stack:\n");
                         for (ISeq s = Stack.seq(); s != null; s = s.next()) {
-                            RT.print(s.first(), w);
+                            Object item = s.first();
+                            // At the REPL, do not immediately realize lazy seq's
+                            if(item instanceof LazySeq) {
+                                w.write("(...LazySeq...)");
+                            } else {
+                                RT.print(item, w);
+                            }
                             w.write('\n');
                         }
                         // w.write('\n');

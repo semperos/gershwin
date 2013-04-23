@@ -23,6 +23,7 @@ At first glance, this seems like a interesting prospect to avoid a lot of menial
 
 ## Done ##
 
+ * [DONE] Fix reading of word definitions (Gershwin impl. of readDelimitedList)
  * [DONE] Enhance syntax of defining new words to allow associating metadata with the word
  * [DONE] Add special invoke word to invoke Clojure keywords, so they act like specialized quotations.
  * [DONE] Use of immutable methods on Stack returns `nil` instead of throwing exceptions for stack underflow -- needs to throw exception

@@ -10,6 +10,7 @@
  * Porting Factor combinators to Gershwin
  * Testing "framework"
  * Programmatic reading/parsing (Parsing words, Factor lexer)
+ * Compiler -- make sure line/col numbers are present for Gershwin forms
  * AOT compilation -- likely first pass will be Clojure source output -> AOT-compile that, only need to handle custom output for words, quotations, and then of course recursively output body definitions of words, which will eventually work down to Clojure code.
  * Support Factor's backslash which allows putting a word on the stack, to be executed later like a quotation would (prevents need to create a quotation on top of a word, which is already like a quotation)
  * Reconsider how vars default back to Clojure ones if not present as Gershwin ones (likely to cause confusion)

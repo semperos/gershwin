@@ -45,6 +45,16 @@ public class Parser {
             }
         }
     }
+
+    static public int read1(Reader r){
+	try {
+            return r.read();
+        }
+	catch(IOException e) {
+            throw Util.sneakyThrow(e);
+        }
+    }
+
     // *************** End copying because things aren't public in LispReader ***************
 
     /**
@@ -54,10 +64,10 @@ public class Parser {
     public static Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive) {
         try {
             for(; ;) {
-                int ch = LispReader.read1(r);
+                int ch = read1(r);
 
                 while(isWhitespace(ch))
-                    ch = LispReader.read1(r);
+                    ch = read1(r);
 
                 if(ch == -1) {
                     if(eofIsError)
@@ -72,7 +82,7 @@ public class Parser {
                 // If ':' is followed by a space, it's a word definition, else it's handed off
                 // to the Clojure reader.
                 if(ch == ':') {
-                    int ch2 = LispReader.read1(r);
+                    int ch2 = read1(r);
                     if(isWhitespace(ch2)) {
                         // Word definition
                         unread(r, ch2);
@@ -86,7 +96,7 @@ public class Parser {
                 // We'll use '<' and '>' to contain quotations, since they're
                 // one of the few characters that are left unreadable by the Clojure reader.
                 if(ch == '<') {
-                    int ch2 = LispReader.read1(r);
+                    int ch2 = read1(r);
                     if(isWhitespace(ch2)) {
                         // Quotation
                         unread(r, ch2);
@@ -144,7 +154,7 @@ public class Parser {
             Reader r = (Reader) reader;
             int ch;
             do {
-                ch = LispReader.read1(r);
+                ch = read1(r);
             } while(ch != -1 && ch != '\n' && ch != '\r');
             return r;
 	}
@@ -158,10 +168,10 @@ public class Parser {
 	ArrayList a = new ArrayList();
 
 	for(; ;) {
-            int ch = LispReader.read1(r);
+            int ch = read1(r);
 
             while(isWhitespace(ch))
-                ch = LispReader.read1(r);
+                ch = read1(r);
 
             if(ch == -1) {
                 if(firstline < 0)

@@ -307,6 +307,18 @@
   [x y z -- x y z x]
   (peek* (pop (st-pop))) ;
 
+: ? "Choose between t or f depending on truthiness of ?"
+  [? t f]
+  rot < drop > < nip > if ;
+
+: or "Outputs first truthy value, or false if neither is truthy."
+  [x y -- ?]
+  dupd ? ;
+
+: and "If both values are true, outputs TOS. Else returns false."
+  [x y -- ?]
+  over ? ;
+
 ! ## Dataflow Combinators ##
 
 ! ### Preservering combinators ###

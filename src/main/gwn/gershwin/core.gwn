@@ -8,13 +8,13 @@
 
 (stack-void
  (defn gershwin-resolve
-   "Resolve the `name` of a Gershwin language form as a var. Gershwin does some mangling of names to prevent clashes with core Clojure forms, so this replicates that."
+   "Resolve the `name` of a language form as a var, checking Gershwin var definitions with a fallback to Clojure ones. Gershwin does some mangling of names to prevent clashes with core Clojure forms, so this replicates that."
    [s]
-   (let [vr (resolve (symbol s))]
+   (let [vr (-> s name gershwin.lang.RT/formatGershwinName
+                symbol resolve)]
      (if vr
        vr
-       (-> s name gershwin.lang.RT/formatGershwinName
-           symbol resolve)))))
+       (resolve (symbol s))))))
 
 (stack-void
  (defn gershwin-var

@@ -354,6 +354,18 @@
   [x y z p q --]
   < keep3 > dip invoke ;
 
+: tri "Invoke the three quotations on TOS sequentially with the third item on TOS present for all invocations."
+  [x p q r --]
+  < < keep > dip keep > dip invoke ;
+
+: tri2 "Same as tri, but work with two pieces of data."
+  [x y p q r --]
+  < < keep2 > dip keep2 > dip invoke ;
+
+: tri3 "Same as tri, but work with three pieces of data."
+  [x y z p q r --]
+  < < keep3 > dip keep3 > dip invoke ;
+
 ! Basic math
 
 : + [n n -- n] (ap2 +) ;

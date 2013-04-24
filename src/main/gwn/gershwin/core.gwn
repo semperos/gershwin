@@ -303,8 +303,43 @@
   [x y z -- x y z x]
   (peek* (pop (st-pop))) ;
 
+! ## Dataflow Combinators ##
+
+! Preservering combinators
+
+: dip "Remove second item from TOS, execute the quotation on TOS, then restore second item on TOS."
+  [x quot -- x]
+  (let [quot (pop-it)
+        x (pop-it)]
+    (.invoke quot)
+    x) ;
+
+: dip2 "Remove the second and third items from TOS, execute the quotation on TOS, then restore the second and third items on TOS."
+  [x y quot -- x y]
+  (let [quot (pop-it)
+        y (pop-it)
+        x (pop-it)]
+    (.invoke quot)
+    (conj-it x)
+    y) ;
+
+: dip3 "Remove the second, third, and fourth items from TOS, execute the quotation on TOS, then restore the second, third, and fourth items on TOS."
+  [x y z quot -- x y z]
+  (let [quot (pop-it)
+        z (pop-it)
+        y (pop-it)
+        x (pop-it)]
+    (.invoke quot)
+    (conj-it x)
+    (conj-it y)
+    z) ;
+
 ! Basic math
 
 : + [n n -- n] (ap2 +) ;
 
 : - [n n -- n] (pop-n-swap -) ;
+
+: * [n n -- n] (ap2 *) ;
+
+: div [n n -- n] (pop-n-swap /) ;

@@ -6,6 +6,7 @@
 
 ## Features ##
 
+ * Managing namespaces, requires and imports via Gershwin instead of Clojure interop
  * Porting Clojure collection handling to Gershwin (NEXT: Basic math)
  * Porting Factor combinators to Gershwin (NEXT: Conditional combinators)
  * Testing "framework"

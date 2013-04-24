@@ -88,14 +88,74 @@ public class GershwinRepl {
                 } else {
                     r.unread(ch);
                 }
-                readRet = Parser.read(r, true, null, false);
-                checkIfExit(readRet, w);
-                evalRet = Compiler.eval(readRet);
-                handleEval(evalRet, w);
+                try {
+                    readRet = Parser.read(r, true, null, false);
+                    checkIfExit(readRet, w);
+                    evalRet = Compiler.eval(readRet);
+                    handleEval(evalRet, w);
+                } catch(Exception e) {
+                    Exception rootException = (Exception) rootCause(e);
+                    StackTraceElement[] tr = rootException.getStackTrace();
+                    StackTraceElement el = null;
+                    if(tr.length != 0) {
+                        el = tr[0];
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(rootException.getClass().getSimpleName())
+                        .append(" ")
+                        .append(rootException.getMessage())
+                        .append(" ");
+                    if(!(rootException instanceof Compiler.CompilerException)) {
+                        sb.append(" ");
+                        if(el != null) {
+                            sb.append(formatStackTraceElement(el));
+                        } else {
+                            sb.append("[trace missing]");
+                        }
+                    }
+                    System.err.println(sb.toString());
+                } finally {
+                    w.flush();
+                }
             }
         }
 	catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    static Throwable rootCause(Throwable t) {
+        for(; ;) {
+            if(t instanceof Compiler.CompilerException
+               && !(((Compiler.CompilerException) t).source.equals("NO_SOURCE_FILE"))) {
+                return t;
+            }
+            Throwable nextCause = t.getCause();
+            if(nextCause != null) {
+                return rootCause(nextCause);
+            } else {
+                return t;
+            }
+        }
+    }
+
+    static String formatStackTraceElement(StackTraceElement el) {
+        String fileName = el.getFileName();
+        boolean isGershwinFile = (fileName != null &&
+                                  (fileName.endsWith(".gwn")
+                                   || fileName.equals("NO_SOURCE_FILE")));
+        StringBuilder sb = new StringBuilder();
+        if(isGershwinFile) {
+            // @todo Clojure demunges the nastiness of fn classes for readability
+            sb.append(el.getClassName() + "." + (el.getMethodName()));
+        } else {
+            sb.append(el.getClassName() + "." + (el.getMethodName()));
+        }
+        sb.append(" (")
+            .append(el.getFileName())
+            .append(":")
+            .append(el.getLineNumber())
+            .append(")");
+        return sb.toString();
     }
 }

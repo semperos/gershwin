@@ -75,7 +75,7 @@
    [x] (Stack/conjMutable x)))
 
 (stack-void
- (defn ap1
+ (defn ap
    "Apply the function to TOS"
    [a-fn] (a-fn (pop-it))))
 
@@ -184,37 +184,37 @@
 
 : clear [] (stack-void (Stack/clear)) ;
 
-: pr [n --] (stack-void (ap1 pr*)) ;
+: pr [n --] (stack-void (ap pr*)) ;
 
-: prn [n --] (stack-void (ap1 prn*)) ;
+: prn [n --] (stack-void (ap prn*)) ;
 
-: print [n --] (stack-void (ap1 print*)) ;
+: print [n --] (stack-void (ap print*)) ;
 
-: println [n --] (stack-void (ap1 println*)) ;
+: println [n --] (stack-void (ap println*)) ;
 
 : meta {:added "initial" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
   [x -- y]
-  (ap1 meta) ;
+  (ap meta) ;
 
 : type "Get an item's type"
   [x -- y]
-  (ap1 type) ;
+  (ap type) ;
 
 : class "Get an item's class"
   [x -- y]
-  (ap1 class) ;
+  (ap class) ;
 
 : symbol "Coerce TOS to a symbol"
   [x -- y]
-  (ap1 symbol) ;
+  (ap symbol) ;
 
 : var "Get var for TOS. Currently uses `resolve` as `var` causes an error."
   [x -- y]
-  (ap1 gershwin-resolve) ;
+  (ap gershwin-resolve) ;
 
 : gershwin-var "For vars that share names between Gershwin words and Clojure functions, this removes the ambiguity and attempts to resolve the item as a Gershwin word var."
   [x -- y]
-  (ap1 gershwin-var) ;
+  (ap gershwin-var) ;
 
 : print-doc "Print documentation metadata for a Gershwin word with the given name" [n --]
   meta :doc invoke2 println ;
@@ -444,6 +444,6 @@
 
 : div [n n -- n] (pop-n-swap /) ;
 
-: odd? [n -- ?] (ap1 odd?) ;
+: odd? [n -- ?] (ap odd?) ;
 
-: even? [n -- ?] (ap1 even?) ;
+: even? [n -- ?] (ap even?) ;

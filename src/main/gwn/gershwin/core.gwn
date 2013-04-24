@@ -316,23 +316,15 @@
 
 : dip2 "Remove the second and third items from TOS, execute the quotation on TOS, then restore the second and third items on TOS."
   [x y quot -- x y]
-  (let [quot (pop-it)
-        y (pop-it)
-        x (pop-it)]
-    (.invoke quot)
-    (conj-it x)
-    y) ;
+  swap < dip > dip ;
 
 : dip3 "Remove the second, third, and fourth items from TOS, execute the quotation on TOS, then restore the second, third, and fourth items on TOS."
   [x y z quot -- x y z]
-  (let [quot (pop-it)
-        z (pop-it)
-        y (pop-it)
-        x (pop-it)]
-    (.invoke quot)
-    (conj-it x)
-    (conj-it y)
-    z) ;
+  swap < dip2 > dip ;
+
+: dip4 "Remove the second, third, and fourth items from TOS, execute the quotation on TOS, then restore the second, third, and fourth items on TOS."
+  [w x y z quot -- w x y z]
+  swap < dip3 > dip ;
 
 ! Basic math
 

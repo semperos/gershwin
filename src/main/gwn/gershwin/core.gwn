@@ -426,6 +426,14 @@
   [u v w x y z quot --]
   dup dup tri2* ;
 
+: both? "Returns truthy if application of quotation to both values is truthy in each case."
+  [x y quot -- ?]
+  bi& and ;
+
+: either? "Returns truthy if either application of quotation produces a truthy value."
+  [x y quot -- ?]
+  bi& or ;
+
 ! Basic math
 
 : + [n n -- n] (ap2 +) ;

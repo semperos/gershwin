@@ -6,8 +6,8 @@
 
 ## Features ##
 
- * Porting Clojure collection handling to Gershwin
- * Porting Factor combinators to Gershwin
+ * Porting Clojure collection handling to Gershwin (NEXT: Basic math)
+ * Porting Factor combinators to Gershwin (NEXT: Conditional combinators)
  * Testing "framework"
  * Programmatic reading/parsing (Parsing words, Factor lexer)
  * Compiler -- make sure line/col numbers are present for Gershwin forms

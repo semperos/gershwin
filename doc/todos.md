@@ -28,6 +28,7 @@ At first glance, this seems like a interesting prospect to avoid a lot of menial
 
 ## Done ##
 
+ * [DONE] Implement 'if' via Clojure interop in core.gwn; keep extra-primitive one as 'if*' for example
  * [DONE] Fix reading of word definitions (Gershwin impl. of readDelimitedList)
  * [DONE] Enhance syntax of defining new words to allow associating metadata with the word
  * [DONE] Add special invoke word to invoke Clojure keywords, so they act like specialized quotations.

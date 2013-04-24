@@ -196,6 +196,14 @@
   [x -- y]
   (ap1 meta) ;
 
+: type "Get an item's type"
+  [x -- y]
+  (ap1 type) ;
+
+: class "Get an item's class"
+  [x -- y]
+  (ap1 class) ;
+
 : symbol "Coerce TOS to a symbol"
   [x -- y]
   (ap1 symbol) ;

@@ -58,29 +58,48 @@
      (peek coll))))
 
 (stack-void
- (defn st-pop [] (Stack/pop)))
+ (defn st-pop
+   "Call Stack's pop method. Immutable."
+   []
+   (Stack/pop)))
 
 (stack-void
- (defn pop-it [] (Stack/popIt)))
+ (defn pop-it
+   "Remove and return the item on TOS. Mutable."
+   []
+   (Stack/popIt)))
 
 (stack-void
- (defn conj-it [x] (Stack/conjMutable x)))
+ (defn conj-it
+   "Conj the item onto the data stack. Mutable."
+   [x] (Stack/conjMutable x)))
 
 (stack-void
- (defn apply-pop1 [a-fn] (a-fn (pop-it))))
+ (defn ap1
+   "Apply the function to TOS"
+   [a-fn] (a-fn (pop-it))))
 
 (stack-void
- (defn apply-pop2 [a-fn] (a-fn (pop-it) (pop-it))))
+ (defn ap2
+   "Apply the function to the top two items on TOS"
+   [a-fn] (a-fn (pop-it) (pop-it))))
 
 (stack-void
- (defn apply-pop3 [a-fn] (a-fn (pop-it) (pop-it) (pop-it))))
+ (defn ap3
+   "Apply the function to the top three items on TOS"
+   [a-fn] (a-fn (pop-it) (pop-it) (pop-it))))
 
 (stack-void
- (defn pop-n-swap2 [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a))))
+ (defn pop-n-swap
+   "Remove top two items from TOS, swap, then apply the function."
+   [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a))))
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! BEGIN Copying of Clojure's core.clj, to allow loading using !
+! Gershwin's loader instead of Clojure's.                     !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 (stack-void
- ;; BEGIN Copying of Clojure's core.clj, to allow loading using
- ;; Gershwin's loader instead of Clojure's.
  (defonce ^:dynamic
    ^{:private true
      :doc "A stack of paths currently being loaded by this thread"}
@@ -141,9 +160,11 @@
        (when-not (= path (first *pending-paths*))
          (binding [*pending-paths* (conj *pending-paths* path)]
            ;; This is the main departure from Clojure's load
-           (gershwin.lang.RT/load (.substring path 1)))))))
- ;; END Copying Clojure's core.clj
- )
+           (gershwin.lang.RT/load (.substring path 1))))))))
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! END Copying Clojure's core.clj !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! ## Invokables ##
 
@@ -155,7 +176,7 @@
 
 ! ## Code loading ##
 
-: load [s --] (stack-void (load (pop-it))) ;
+: load [s --] (stack-void (ap1 load)) ;
 
 : load-paths [ss --] (apply load (pop-it)) ;
 
@@ -163,29 +184,29 @@
 
 : clear [] (stack-void (Stack/clear)) ;
 
-: pr [n --] (stack-void (pr* (pop-it))) ;
+: pr [n --] (stack-void (ap1 pr*)) ;
 
-: prn [n --] (stack-void (prn* (pop-it))) ;
+: prn [n --] (stack-void (ap1 prn*)) ;
 
-: print [n --] (stack-void (print* (pop-it))) ;
+: print [n --] (stack-void (ap1 print*)) ;
 
-: println [n --] (stack-void (println* (pop-it))) ;
+: println [n --] (stack-void (ap1 println*)) ;
 
 : meta {:added "initial" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
   [x -- y]
-  (meta (pop-it)) ;
+  (ap1 meta) ;
 
 : symbol "Coerce TOS to a symbol"
   [x -- y]
-  (symbol (pop-it)) ;
+  (ap1 symbol) ;
 
 : var "Get var for TOS. Currently uses `resolve` as `var` causes an error."
   [x -- y]
-  (gershwin-resolve (pop-it)) ;
+  (ap1 gershwin-resolve) ;
 
 : gershwin-var "For vars that share names between Gershwin words and Clojure functions, this removes the ambiguity and attempts to resolve the item as a Gershwin word var."
   [x -- y]
-  (gershwin-var (pop-it)) ;
+  (ap1 gershwin-var) ;
 
 : print-doc "Print documentation metadata for a Gershwin word with the given name" [n --]
   meta :doc invoke2 println ;
@@ -194,18 +215,31 @@
 
 ! Basics are: drop, swap, dup, rot
 
-: drop "Remove the item at the TOS." [x --] (do (pop-it) ::stack-void) ;
+: drop "Remove the item at the TOS."
+  [x --]
+  (do (pop-it) ::stack-void) ;
 
 ! Common synonym
 : . [x --] drop ;
 
-: swap [x y -- y x] (let [a (pop-it) b (pop-it)] (conj-it a) b) ;
+: swap "Swaps the two items on TOS."
+  [x y -- y x]
+  (let [y (pop-it)
+        x (pop-it)]
+    (conj-it y) x) ;
 
-: dup [x -- x x] (st-peek) ;
+: dup "Duplicate the TOS."
+  [x -- x x]
+  (st-peek) ;
 
 ! @todo Will add warnings about using things like rot if/when
 !   we get Factor-style dataflow combinators implemented
-: rot [x y z -- y z x] (let [a (pop-it) b (pop-it) c (pop-it)] (conj-it b) (conj-it a) c) ;
+: rot "Rotate the items on TOS as shown in stack effect."
+  [x y z -- y z x]
+  (let [z (pop-it)
+        y (pop-it)
+        x (pop-it)]
+    (conj-it y) (conj-it z) x)          ;
 
 ! Factor extensions to base set
 
@@ -214,40 +248,55 @@
 ! @todo Factor implements these as primitives, even though they could be implemented
 !   with the basic shuffle words above. Consider.
 
-: drop2 [x y --] drop drop ;
+: drop2 "Remove top two items from TOS."
+  [x y --]
+  drop drop ;
 
-: drop3 [x y z --] drop drop drop ;
+: drop3 "Remove top three items from TOS."
+  [x y z --]
+  drop drop drop ;
 
-: nip [x y -- y] swap drop ;
+: nip "Remove second element from TOS."
+  [x y -- y]
+  swap drop ;
 
-: nip2 [x y z -- z] swap drop swap drop ;
+: nip2 "Remove second and third elements from TOS."
+  [x y z -- z]
+  swap drop swap drop ;
 
-: dup2 [x y -- x y x y]
-  (let [a (st-peek)
-        b (peek* (st-pop))]
-    (conj-it b) a) ;
+: dup2 "Duplicate top two items on TOS."
+  [x y -- x y x y]
+  (let [y (st-peek)
+        x (peek* (st-pop))]
+    (conj-it x) y) ;
 
-: dup3 [x y z -- x y z x y z]
+: dup3 "Duplicate top three items on TOS."
+  [x y z -- x y z x y z]
   (let [cdr (st-pop)
         cddr (pop cdr)
-        a (st-peek)
-        b (peek* cdr)
-        c (peek* cddr)]
-    (conj-it c) (conj-it b) a) ;
+        z (st-peek)
+        y (peek* cdr)
+        x (peek* cddr)]
+    (conj-it x) (conj-it y) z) ;
 
-: over [x y -- x y x] (peek* (st-pop)) ;
+: over "Duplicate second item on TOS."
+  [x y -- x y x]
+  (peek* (st-pop)) ;
 
-: over2 [x y z -- x y z x y]
+: over2 "Duplicate second and third items on TOS."
+  [x y z -- x y z x y]
   (let [cdr (st-pop)
         cddr (pop cdr)
-        b (peek* cdr)
-        c (peek* cddr)]
-    (conj-it c) b) ;
+        y (peek* cdr)
+        x (peek* cddr)]
+    (conj-it x) y) ;
 
-: pick [x y z -- x y z x] (peek* (pop (st-pop))) ;
+: pick "Duplicate third item on TOS."
+  [x y z -- x y z x]
+  (peek* (pop (st-pop))) ;
 
 ! Basic math
 
-: + [n n -- n] (apply-pop2 +) ;
+: + [n n -- n] (ap2 +) ;
 
-: - [n n -- n] (pop-n-swap2 -) ;
+: - [n n -- n] (pop-n-swap -) ;

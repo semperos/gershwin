@@ -443,3 +443,7 @@
 : * [n n -- n] (ap2 *) ;
 
 : div [n n -- n] (pop-n-swap /) ;
+
+: odd? [n -- ?] (ap1 odd?) ;
+
+: even? [n -- ?] (ap1 even?) ;

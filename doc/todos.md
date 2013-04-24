@@ -2,7 +2,7 @@
 
 ## Bugs ##
 
- * I'm sure there are plenty...
+ * If a docstring is added by a stack effect is ommitted, a word is not defined but no error or warning is issued.
 
 ## Features ##
 

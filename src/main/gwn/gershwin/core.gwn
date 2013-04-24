@@ -5,12 +5,19 @@
   :gershwin.core/stack-void)
 
 (do
-  ;; Functions and macros for common Clojure interop needs
   (defmacro stack-void
     "The keyword :gershwin.core/stack-void is a special value that the compiler will not put on the data stack. Use this to evaluate Clojure but to prevent the return value of the Clojure expression from being added to the stack."
     [& body]
     `(do ~@body ::stack-void))
   ::stack-void)
+
+(stack-void
+ (defmacro gershwin-ns
+   "Wrap ns with stack void. Having do or some stack popping at the beginning of every file is ugly."
+   [& body]
+   `(stack-void
+     (ns ~@body)
+     (refer 'gershwin.core))))
 
 (stack-void
  (defn gershwin-resolve

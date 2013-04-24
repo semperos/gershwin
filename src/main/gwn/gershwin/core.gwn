@@ -168,15 +168,31 @@
 
 ! ## Invokables ##
 
-! @todo Clarify use of stack-void here
-: invoke [x -- ?] (stack-void (.invoke (pop-it))) ;
+: invoke "Invoke an IInvocable (quotations). The quotation itself puts things on the stack, so the result of the invocation itself is ignored."
+  [quot -- ...]
+  (stack-void (.invoke (pop-it))) ;
 
-: invoke2 [x y -- ?]
-  (.invoke (pop-it) (pop-it)) ;
+: invoke-ap "Invoke the IInvocable, applying it to the next item on TOS as an argument. This and its higher-arity counterparts are not designed for quotations, since quotations do not take arguments, but instead to make idiomatic use of Clojure forms that implement IFn.
+
+  Example: {:answer 42} :answer invoke-ap"
+  [x invocable -- ...]
+  (ap (pop-it)) ;
+
+: invoke-ap2 "Same as invoke-ap, but apply the invocable to top two items on TOS."
+  [x y invocable -- ...]
+  (ap2 (pop-it)) ;
+
+: invoke-ap3 "Same as invoke-ap, but apply the invocable to top three items on TOS."
+  [x y z invocable -- ...]
+  (ap3 (pop-it)) ;
+
+: invoke-swap "Invoke the IInvocable, apply it to the top two items on TOS after swapping them."
+  [x y invocable -- ...]
+  (pop-n-swap (pop-it)) ;
 
 ! ## Code loading ##
 
-: load [s --] (stack-void (ap1 load)) ;
+: load [s --] (stack-void (ap load)) ;
 
 : load-paths [ss --] (apply load (pop-it)) ;
 

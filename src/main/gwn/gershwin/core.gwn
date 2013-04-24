@@ -240,14 +240,18 @@
   [x -- x x]
   (st-peek) ;
 
-! @todo Will add warnings about using things like rot if/when
+! @todo Will add warnings about using things like rot, dupd if/when
 !   we get Factor-style dataflow combinators implemented
 : rot "Rotate the items on TOS as shown in stack effect."
   [x y z -- y z x]
   (let [z (pop-it)
         y (pop-it)
         x (pop-it)]
-    (conj-it y) (conj-it z) x)          ;
+    (conj-it y) (conj-it z) x) ;
+
+: dupd "Duplicate second item on TOS in-place."
+  [x y -- x x y]
+  < dup > dip ;
 
 ! Factor extensions to base set
 

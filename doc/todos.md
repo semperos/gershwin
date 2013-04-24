@@ -6,7 +6,6 @@
 
 ## Features ##
 
- * Make exception handling saner at REPL (i.e. catch them)
  * Managing namespaces, requires and imports via Gershwin instead of Clojure interop
  * Porting Clojure collection handling to Gershwin (NEXT: Basic math)
  * Porting Factor combinators to Gershwin (NEXT: Conditional combinators)
@@ -31,6 +30,7 @@ At first glance, this seems like a interesting prospect to avoid a lot of menial
 
 ## Done ##
 
+ * [DONE] Make exception handling saner at REPL (i.e. catch them)
  * [DONE] Do same parsing for < as we do for : so that < can still be used for names.
  * [DONE] Copy read1 into Parser from LispReader
  * [DONE] Implement 'if' via Clojure interop in core.gwn; keep extra-primitive one as 'if*' for example

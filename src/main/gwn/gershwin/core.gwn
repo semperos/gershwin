@@ -178,23 +178,27 @@
   [quot -- ...]
   (stack-void (.invoke (pop-it))) ;
 
-: invoke-ap "Invoke the IInvocable, applying it to the next item on TOS as an argument. This and its higher-arity counterparts are not designed for quotations, since quotations do not take arguments, but instead to make idiomatic use of Clojure forms that implement IFn.
+: invoke-apply "Invoke the IInvocable, applying it to the next item on TOS as an argument. This and its higher-arity counterparts are not designed for quotations, since quotations do not take arguments, but instead to make idiomatic use of Clojure forms that implement IFn.
 
-  Example: {:answer 42} :answer invoke-ap"
+  Example: {:answer 42} :answer invoke-apply"
   [x invocable -- ...]
   (ap (pop-it)) ;
 
-: invoke-ap2 "Same as invoke-ap, but apply the invocable to top two items on TOS."
+: invoke-apply2 "Same as invoke-apply, but apply the invocable to top two items on TOS."
   [x y invocable -- ...]
   (ap2 (pop-it)) ;
 
-: invoke-ap3 "Same as invoke-ap, but apply the invocable to top three items on TOS."
+: invoke-apply3 "Same as invoke-apply, but apply the invocable to top three items on TOS."
   [x y z invocable -- ...]
   (ap3 (pop-it)) ;
 
 : invoke-swap "Invoke the IInvocable, apply it to the top two items on TOS after swapping them."
   [x y invocable -- ...]
   (pop-n-swap (pop-it)) ;
+
+: invoke-kw "Alias for invoke-apply, for common use-case of using a keyword like a function."
+  [m kw --]
+  invoke-apply ;
 
 ! ## Code loading ##
 
@@ -230,6 +234,10 @@
   [x -- y]
   (ap symbol) ;
 
+: symbol? "True if TOS is a symbol"
+  [x -- ?]
+  (ap symbol?) ;
+
 : var "Get var for TOS. Currently uses `resolve` as `var` causes an error."
   [x -- y]
   (ap gershwin-resolve) ;
@@ -238,8 +246,10 @@
   [x -- y]
   (ap gershwin-var) ;
 
-: print-doc "Print documentation metadata for a Gershwin word with the given name" [n --]
-  meta :doc invoke2 println ;
+: print-doc "Print documentation metadata for a Gershwin word with the given name. Accepts either a symbol or a var."
+  [n --]
+  dup symbol? < gershwin-var > < > if
+  meta :doc invoke-kw println ;
 
 ! ## Shuffle words ##
 

@@ -108,10 +108,10 @@ public class RT {
 
     public static void doInit() throws ClassNotFoundException, IOException {
         // clojure.lang.Compiler.eval(RT.list(IN_NS, GERSHWIN));
-        IN_NS.invoke(GERSHWIN);
-        GERSHWIN_NS.importClass(STACK_CLASS_SYM, Stack.class);
-        GERSHWIN_NS.importClass(STACK_CLASS_EX_SYM, Stack.StackUnderflowException.class);
-        REFER.invoke(CLOJURE);
+        // IN_NS.invoke(GERSHWIN);
+        // GERSHWIN_NS.importClass(STACK_CLASS_SYM, Stack.class);
+        // GERSHWIN_NS.importClass(STACK_CLASS_EX_SYM, Stack.StackUnderflowException.class);
+        // REFER.invoke(CLOJURE);
         load("gershwin/core");
         // Here Clojure also tries to load a user.clj if it's available.
 

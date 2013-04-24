@@ -388,6 +388,28 @@
   [u v w x y z p q r --]
   < dip4 > dip2 bi2* ;
 
+! NOTE: The `spread` word requires words we haven't implemented yet. Punting til later.
+
+! ### Apply combinators ###
+
+! Apply combinators apply a single quotation to multiple values. In this way, they are equivalent to using the spread combinators with each quotation being identical. The ampersand `&` denotes apply combinators (The `@` from Factor cannot be used as a Clojure/Gershwin symbol character).
+
+: bi& "Apply the quotation to the top two items on TOS in order."
+  [x y quot --]
+  dup bi* ;
+
+: bi2& "Apply the quotation to w and x, and then y and z."
+  [w x y z quot --]
+  dup bi2* ;
+
+: tri& "Apply the quotation to the top three items on TOS in order."
+  [x y z quot --]
+  dup dup tri* ;
+
+: tri2& "Apply the quotation to u and v, then to w and x, and finally to y and z."
+  [u v w x y z quot --]
+  dup dup tri2* ;
+
 ! Basic math
 
 : + [n n -- n] (ap2 +) ;

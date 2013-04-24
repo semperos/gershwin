@@ -307,6 +307,15 @@
   [x y z -- x y z x]
   (peek* (pop (st-pop))) ;
 
+: if
+  [? then else]
+  (let [else-quot (pop-it)
+        then-quot (pop-it)
+        condition (pop-it)]
+    (if condition
+      (stack-void (.invoke then-quot))
+      (stack-void (.invoke else-quot))))           ;
+
 : ? "Choose between t or f depending on truthiness of ?"
   [? t f]
   rot < drop > < nip > if ;

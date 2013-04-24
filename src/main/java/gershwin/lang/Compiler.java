@@ -30,7 +30,7 @@ public class Compiler {
     static final Keyword STACK_EFFECT_KEY = Keyword.intern(null, "stack-effect");
     static final Symbol DEF = Symbol.intern("def");
     static final Symbol FN = Symbol.intern("fn");
-    static final Symbol IF = Symbol.intern("if");
+    static final Symbol IF = Symbol.intern("if*");
 
     static final public IPersistentMap specials =
         PersistentHashMap

@@ -6,6 +6,7 @@
 
 ## Features ##
 
+ * Make exception handling saner at REPL (i.e. catch them)
  * Managing namespaces, requires and imports via Gershwin instead of Clojure interop
  * Porting Clojure collection handling to Gershwin (NEXT: Basic math)
  * Porting Factor combinators to Gershwin (NEXT: Conditional combinators)
@@ -20,6 +21,7 @@
 ## Maybe's ##
 
  * Allow identifiers that start with numbers, like Factor (name-munging)
+ * Consider refactor to write impl. completely in Clojure and use Clojure's tools.reader as exemplar for Gershwin reader, as well as the Gershwin reader's Clojure delegate
 
 ## Probably Not's ##
 
@@ -29,6 +31,8 @@ At first glance, this seems like a interesting prospect to avoid a lot of menial
 
 ## Done ##
 
+ * [DONE] Do same parsing for < as we do for : so that < can still be used for names.
+ * [DONE] Copy read1 into Parser from LispReader
  * [DONE] Implement 'if' via Clojure interop in core.gwn; keep extra-primitive one as 'if*' for example
  * [DONE] Fix reading of word definitions (Gershwin impl. of readDelimitedList)
  * [DONE] Enhance syntax of defining new words to allow associating metadata with the word

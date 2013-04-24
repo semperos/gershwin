@@ -305,7 +305,7 @@
 
 ! ## Dataflow Combinators ##
 
-! Preservering combinators
+! ### Preservering combinators ###
 
 : dip "Remove second item from TOS, execute the quotation on TOS, then restore second item on TOS."
   [x quot -- x]
@@ -337,6 +337,22 @@
 : keep3 "Like keep, but restores first, second, and third items on TOS after invoking quotation with them."
   [..a x y z quot -> ( ..a x y z -- ..b ) -- ..b x y z]
   < dup3 > dip dip3 ;
+
+! ### Cleave combinators ###
+
+! Cleave operators mean: take a single piece of data and apply n number of quotations to it.
+
+: bi "Invoke the two quotations on TOS sequentially with the third item on TOS present for both invocations."
+  [x p q --]
+  < keep > dip invoke ;
+
+: bi2 "Same as bi, but work with two pieces of data."
+  [x y p q --]
+  < keep2 > dip invoke ;
+
+: bi3 "Same as bi, but work with three pieces of data."
+  [x y z p q --]
+  < keep3 > dip invoke ;
 
 ! Basic math
 

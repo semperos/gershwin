@@ -7,6 +7,7 @@
 ## Features ##
 
  * Managing namespaces, requires and imports via Gershwin instead of Clojure interop
+    * Current Status: Need to work out referring gershwin.core when using gershwin-ns for new namespaces.
  * Porting Clojure collection handling to Gershwin (NEXT: Basic math)
  * Porting Factor combinators to Gershwin (NEXT: Conditional combinators)
  * Testing "framework"

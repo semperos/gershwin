@@ -73,11 +73,12 @@ public class Parser {
                 // to the Clojure reader.
                 if(ch == ':') {
                     int ch2 = LispReader.read1(r);
-                    if(isWhitespace(ch2)){
-                        // System.out.println("Reading a Gershwin Word definition...");
+                    if(isWhitespace(ch2)) {
+                        // Word definition
                         unread(r, ch2);
                         return new ColonReader().invoke(r, (char) ch);
                     } else {
+                        // Clojure keyword
                         unread(r, ch2);
                     }
                 }
@@ -85,7 +86,15 @@ public class Parser {
                 // We'll use '<' and '>' to contain quotations, since they're
                 // one of the few characters that are left unreadable by the Clojure reader.
                 if(ch == '<') {
-                    return new QuotationReader().invoke(r, (char) ch);
+                    int ch2 = LispReader.read1(r);
+                    if(isWhitespace(ch2)) {
+                        // Quotation
+                        unread(r, ch2);
+                        return new QuotationReader().invoke(r, (char) ch);
+                    } else {
+                        // Clojure symbol
+                        unread(r, ch2);
+                    }
                 }
 
                 // This is where Clojure does a check against all special macro

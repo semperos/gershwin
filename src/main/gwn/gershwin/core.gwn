@@ -340,7 +340,7 @@
 
 ! ### Cleave combinators ###
 
-! Cleave operators mean: take a single piece of data and apply n number of quotations to it.
+! Cleave operators mean: take a single piece of data and apply n number of quotations to it. These are common patterns for repeated uses of `keep`, which should be evident from their implementation.
 
 : bi "Invoke the two quotations on TOS sequentially with the third item on TOS present for both invocations."
   [x p q --]
@@ -365,6 +365,28 @@
 : tri3 "Same as tri, but work with three pieces of data."
   [x y z p q r --]
   < < keep3 > dip keep3 > dip invoke ;
+
+! NOTE: The `cleave` word requires words we haven't implemented yet. Punting til later.
+
+! ### Spread combinators ###
+
+! Spread combinators apply n number of quotations to n (or 2*n) number of values. These are common patterns for repeated uses of dip. The asterisk `*` denotes spread combinators.
+
+: bi* "Apply the two quotations to the two values in order."
+  [x y p q --]
+  < dip > dip invoke ;
+
+: bi2* "Apply p to w and x, then apply q to y and z."
+  [w x y z p q --]
+  < dip2 > dip invoke ;
+
+: tri* "Apply p to x, q to y, and r to z"
+  [x y z p q r --]
+  < < dip2 > dip dip > dip invoke ;
+
+: tri2* "Apply p to u and v, q to w and x, and r to y and z"
+  [u v w x y z p q r --]
+  < dip4 > dip2 bi2* ;
 
 ! Basic math
 

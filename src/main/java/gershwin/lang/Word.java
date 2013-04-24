@@ -14,7 +14,7 @@ import java.util.List;
  * itself will consist of other words and primitives (Clojure/Java)
  * that need to be recursively evaluated until executable code is found.
  */
-public class Word implements IInvokable, IObj {
+public class Word implements IInvocable, IObj {
     private final IPersistentCollection stackEffect;
     private final List definitionForms;
     private final IPersistentMap _meta;

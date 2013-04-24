@@ -1,5 +1,5 @@
 package gershwin.lang;
 
-public interface IInvokable {
+public interface IInvocable {
     public Object invoke();
 }

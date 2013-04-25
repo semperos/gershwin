@@ -99,27 +99,27 @@ public class Compiler {
         // }
     }
 
-    public static class FnExpr implements Expr {
-        final ISeq fnForm;
+    // public static class FnExpr implements Expr {
+    //     final ISeq fnForm;
 
-        public FnExpr(ISeq fnForm) {
-            this.fnForm = fnForm;
-        }
+    //     public FnExpr(ISeq fnForm) {
+    //         this.fnForm = fnForm;
+    //     }
 
-        /**
-         * Clojure functions are evaluated as soon as they are
-         * encountered and the return value is put on the stack.
-         *
-         * Unless I'm crazy, this is the right way to go, and there will
-         * need to be a separate idea of a "quotation" that acts as an
-         * evaluation-delayer, so that Gershwin controls the semantics of
-         * of that eventual evaluation, and not Clojure itself.
-         */
-        public Object eval() {
-            IFn clojureForm = (IFn) clojure.lang.Compiler.eval(this.fnForm, false);
-            return clojureForm.invoke();
-        }
-    }
+    //     /**
+    //      * Clojure functions are evaluated as soon as they are
+    //      * encountered and the return value is put on the stack.
+    //      *
+    //      * Unless I'm crazy, this is the right way to go, and there will
+    //      * need to be a separate idea of a "quotation" that acts as an
+    //      * evaluation-delayer, so that Gershwin controls the semantics of
+    //      * of that eventual evaluation, and not Clojure itself.
+    //      */
+    //     public Object eval() {
+    //         IFn clojureForm = (IFn) clojure.lang.Compiler.eval(this.fnForm, false);
+    //         return clojureForm.invoke();
+    //     }
+    // }
 
     /**
      * Word-creation expr
@@ -154,6 +154,8 @@ public class Compiler {
             }
             IPersistentCollection stackEffect = (IPersistentCollection) this.l.get(1);
             List definition = this.l.subList(2, l.size());
+            // @todo Study how Clojure functions are analyzed/eval'ed before being attached to vars
+            // @todo If other solution not found, include code here to recursively go through forms and resolve + expand var references, so str/reverse becomes clojure.string/reverse, for example.
             Word word = new Word(stackEffect, definition);
             if(wordMeta != null) {
                 createVar(gershwinName, word, wordMeta.assoc(STACK_EFFECT_KEY, stackEffect));
@@ -287,18 +289,16 @@ public class Compiler {
                 if(aVar.isBound() && aVar.deref() instanceof Word) {
                     return analyzeWord((Word) aVar.deref());
                 } else {
-                    return new ClojureExpr(form);
+                    return analyzeClojure(form);
                 }
             } else if((p = (IParser) specials.valAt(form)) != null) {
                 // return p.parse(context, form);
                 return p.parse(form);
             } else {
-                return new ClojureExpr(form);
+                return analyzeClojure(form);
             }
-        } else if(form instanceof ISeq && clojure.lang.RT.first(form).equals(FN)) {
-            return new FnExpr((ISeq) form);
         } else {
-            return new ClojureExpr(form);
+            return analyzeClojure(form);
         }
     }
 
@@ -327,6 +327,17 @@ public class Compiler {
     public static Expr analyzeWord(Word word) {
         // System.out.println("ANALYZE WORD: " + word.getStackEffect() + ", " + word.getDefinition());
         return new WordExpr(word);
+    }
+
+    public static Expr analyzeClojure(Object form) {
+        return new ClojureExpr(form);
+        // if(form instanceof ISeq && clojure.lang.RT.first(form).equals(FN)) {
+        //     System.out.println("FN FOUND");
+        //     return new FnExpr((ISeq) form);
+        // } else {
+        //     System.out.println("WHOA: " + form.getClass().getName());
+        //     return new ClojureExpr(form);
+        // }
     }
 
     // Try loading: (Compiler/load (java.io.StringReader. \"(fn [] (+ (Stack/popIt) (Stack/popIt)))\"))

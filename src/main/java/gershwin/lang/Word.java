@@ -19,6 +19,14 @@ public class Word implements IInvocable, IObj {
     private final List definitionForms;
     private final IPersistentMap _meta;
 
+    public List getDefinitionForms() {
+        return this.definitionForms;
+    }
+
+    public IPersistentCollection getStackEffect() {
+        return this.stackEffect;
+    }
+
     /**
      * Word definitions created programmatically don't require the usual.
      */

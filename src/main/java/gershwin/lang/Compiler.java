@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 public class Compiler {
-    static final String GERSHWIN_VAR_PREFIX = "__GWN__";
+    static final String GERSHWIN_VAR_SUFFIX = "__GWN__";
     static final Keyword DOC_KEY = Keyword.intern(null, "doc");
     static final Keyword STACK_EFFECT_KEY = Keyword.intern(null, "stack-effect");
     static final Symbol DEF = Symbol.intern("def");
@@ -140,7 +140,7 @@ public class Compiler {
          */
         public Object eval() {
             Symbol nameSym = (Symbol) this.l.get(0);
-            Symbol gershwinName = Symbol.intern(GERSHWIN_VAR_PREFIX + nameSym.getName());
+            Symbol gershwinName = Symbol.intern(nameSym.getName() + GERSHWIN_VAR_SUFFIX);
             IPersistentMap wordMeta = null;
             String docString = null;
             if (this.l.get(1) instanceof IPersistentMap) {
@@ -278,13 +278,13 @@ public class Compiler {
             return analyzeQuotation((QuotationList) form);
         } else if(form instanceof Symbol) {
             Symbol formSym = (Symbol) form;
-            String maybeVarName = formSym.getName();
+            String maybeVarName = formSym.toString();
             Namespace currentClojureNs = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
-            Object maybeVar = clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(GERSHWIN_VAR_PREFIX + maybeVarName));
+            // Consider whether suffix should be conditionally appended
+            Object maybeVar = clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(maybeVarName + GERSHWIN_VAR_SUFFIX));
             if(maybeVar != null && maybeVar instanceof Var) {
                 Var aVar = (Var) maybeVar;
                 if(aVar.isBound() && aVar.deref() instanceof Word) {
-                    // System.out.println("You tried to use a Gershwin word definition!");
                     return analyzeWord((Word) aVar.deref());
                 } else {
                     return new ClojureExpr(form);

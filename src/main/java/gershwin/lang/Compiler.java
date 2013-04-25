@@ -280,7 +280,7 @@ public class Compiler {
             Symbol formSym = (Symbol) form;
             String maybeVarName = formSym.getName();
             Namespace currentClojureNs = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
-            Object maybeVar = currentClojureNs.findInternedVar(Symbol.intern(GERSHWIN_VAR_PREFIX + maybeVarName));
+            Object maybeVar = clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(GERSHWIN_VAR_PREFIX + maybeVarName));
             if(maybeVar != null && maybeVar instanceof Var) {
                 Var aVar = (Var) maybeVar;
                 if(aVar.isBound() && aVar.deref() instanceof Word) {

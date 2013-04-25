@@ -8,6 +8,11 @@
 
  * Managing namespaces, requires and imports via Gershwin instead of Clojure interop
     * Current Status: Need to work out referring gershwin.core when using gershwin-ns for new namespaces.
+    * Try direct require, refer, figure out why words aren't being auto-executed (being put on stack instead) (SOLUTION: This was due to how we were checking for whether or not something was a var and then resolving it, which leads us to separate problem of properly compiling fn's on the fly via Clojure).
+ * Word evaluation/compilation
+    * Let's try a metadata approach first. It's a bit of an abuse of the metadata facility in Clojure, but it gives us something to hang our hat on.
+    * Might need to do check: if clojure form, wrap in an immediately-invoked clojure function, the function being evaluated but the fn application not.
+    * !! NEXT !! Get core.gwn loading again with new implementation of words and word definitions
  * Porting Clojure collection handling to Gershwin (NEXT: Basic math)
  * Porting Factor combinators to Gershwin (NEXT: Conditional combinators)
  * Testing "framework"

@@ -1,11 +1,11 @@
 package gershwin.lang;
 
+import clojure.lang.IFn;
 import clojure.lang.IObj;
 import clojure.lang.IPersistentCollection;
 import clojure.lang.IPersistentMap;
 
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Class representing a word definition in Gershwin.
@@ -16,15 +16,15 @@ import java.util.List;
  */
 public class Word implements IInvocable, IObj {
     private final IPersistentCollection stackEffect;
-    private final List definitionForms;
+    private final IFn definitionFn;
     private final IPersistentMap _meta;
-
-    public List getDefinitionForms() {
-        return this.definitionForms;
-    }
 
     public IPersistentCollection getStackEffect() {
         return this.stackEffect;
+    }
+
+    public IFn getDefinitionFn() {
+        return this.definitionFn;
     }
 
     /**
@@ -32,47 +32,36 @@ public class Word implements IInvocable, IObj {
      */
     public Word() {
         this.stackEffect = null;
-        this.definitionForms = null;
+        this.definitionFn = null;
         this._meta = null;
     }
 
     /**
-     * The stack effect is entered directly as a Clojure vector, hence
-     * it's an {@link IPersistentCollection}. The forms of the definition,
-     * however, are entered free-form, and since word definitions are read in
-     * as delimited lists (": ... ;"), the default data structure used is
-     * a simple {@link java.util.ArrayList}.
-     *
      * @todo Stack effect is captured so that, at some point, we could actually
      *   verify the integrity of stack effect declarations programmatically, like
      *   Factor does. For now, it's a type of documentation.
      */
-    public Word(IPersistentCollection stackEffect, List definitionForms) {
+    public Word(IPersistentCollection stackEffect, IFn definitionFn) {
         this.stackEffect = stackEffect;
-        this.definitionForms = definitionForms;
+        this.definitionFn = definitionFn;
         this._meta = null;
     }
 
-    public Word(IPersistentMap meta, IPersistentCollection stackEffect, List definitionForms) {
+    public Word(IPersistentMap meta, IPersistentCollection stackEffect, IFn definitionFn) {
         this.stackEffect = stackEffect;
-        this.definitionForms = definitionForms;
+        this.definitionFn = definitionFn;
         this._meta = meta;
     }
 
     /**
-     * Invoke a word definition by evaluating its forms.
+     * Invoke a word definition by invoking the Clojure function that is its impl.
      */
     public Object invoke() {
-        Object ret = null;
-        Iterator iter = definitionForms.iterator();
-        while (iter.hasNext()) {
-            ret = Compiler.eval(iter.next());
-        }
-        return ret;
+        return this.definitionFn.invoke();
     }
 
     public IObj withMeta(IPersistentMap meta){
-	return new Word(meta, stackEffect, definitionForms);
+	return new Word(meta, stackEffect, definitionFn);
     }
 
     public IPersistentMap meta(){

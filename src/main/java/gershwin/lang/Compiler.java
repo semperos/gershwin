@@ -4,6 +4,7 @@ import clojure.lang.Fn;
 import clojure.lang.IFn;
 import clojure.lang.IObj;
 import clojure.lang.IPersistentCollection;
+import clojure.lang.IPersistentList;
 import clojure.lang.IPersistentMap;
 import clojure.lang.IPersistentStack;
 import clojure.lang.PersistentHashMap;
@@ -15,6 +16,8 @@ import clojure.lang.PersistentList;
 import clojure.lang.PersistentVector;
 import clojure.lang.Symbol;
 import clojure.lang.Var;
+import static clojure.lang.RT.cons;
+import static clojure.lang.RT.conj;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,7 @@ public class Compiler {
     static final Keyword STACK_EFFECT_KEY = Keyword.intern(null, "stack-effect");
     static final Symbol DEF = Symbol.intern("def");
     static final Symbol FN = Symbol.intern("fn");
+    static final Symbol DOT = Symbol.intern(".");
     static final Symbol IF = Symbol.intern("if*");
 
     static final public IPersistentMap specials =
@@ -83,7 +87,6 @@ public class Compiler {
 
 	public Object eval() {
             Object clojureForm = clojure.lang.Compiler.eval(val(), false);
-            // System.out.println("Clojure Evaluated: " + clojureForm.getClass().getName() + ", " + clojureForm);
             if(clojureForm == null) {
                 Stack.conjMutable(clojureForm);
             } else if(!clojureForm.equals(RT.STACK_VOID)) {
@@ -153,9 +156,32 @@ public class Compiler {
                 this.l.remove(1);
             }
             IPersistentCollection stackEffect = (IPersistentCollection) this.l.get(1);
-            List definition = this.l.subList(2, l.size());
-            // @todo Study how Clojure functions are analyzed/eval'ed before being attached to vars
-            // @todo If other solution not found, include code here to recursively go through forms and resolve + expand var references, so str/reverse becomes clojure.string/reverse, for example.
+            // What the reader gives us
+            List rawForms = this.l.subList(2, l.size());
+            // What we're going to store as the word's definition
+            IPersistentCollection definitionForms = PersistentVector.EMPTY;
+            for(int i = 0; i < rawForms.size(); i++) {
+                Object rawForm = rawForms.get(i);
+                // Expr expr = analyze(rawForm);
+                if(rawForm instanceof IPersistentList) {
+                    // Clojure code knows what it's doing
+                    definitionForms = conj(definitionForms, rawForm);
+                } else if(rawForm instanceof Symbol) {
+                    Expr expr = analyzeSymbol((Symbol) rawForm);
+                    if(expr instanceof WordExpr) {
+                        Word word = ((WordExpr) expr).getWord();
+                        // Clojure turtles all the way down.
+                        definitionForms = conj(definitionForms, clojure.lang.RT.list(word.getDefinitionFn()));
+                    } else {
+                        definitionForms = conj(definitionForms, rawForm);
+                    }
+                } else {
+                    Object form = cons(DOT, cons(Symbol.intern("gershwin.lang.Stack"), cons(clojure.lang.RT.list(Symbol.intern("conjMutable"), rawForm), null)));
+                    definitionForms = conj(definitionForms, form);
+                }
+            }
+            Object fnForm = cons(FN, cons(PersistentVector.EMPTY, clojure.lang.RT.seq(definitionForms)));
+            IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
             Word word = new Word(stackEffect, definition);
             if(wordMeta != null) {
                 createVar(gershwinName, word, wordMeta.assoc(STACK_EFFECT_KEY, stackEffect));
@@ -201,16 +227,23 @@ public class Compiler {
             this.word = word;
         }
 
+        public Word getWord() {
+            return this.word;
+        }
+
         /**
          * @todo Reconsider returning values for eval, since
          *   things happen on the stack.
          */
         public Object eval() {
-            // System.out.println("Eval'ing a Word");
             return word.invoke();
         }
     }
 
+    /**
+     * Here to be instructive, fuels if*. Regular if is simply
+     * implemented in Clojure, since it relies on quotations.
+     */
     public static class IfExpr implements Expr {
         final Object condition;
         final Quotation thenQuotation;
@@ -259,44 +292,19 @@ public class Compiler {
      * Currently uses Clojure to evaluate form. This eval
      */
     public static Object eval(Object form) {
-        // System.out.println("Gershwin Eval, raw form: " +
-        //                    form.getClass().getName() +
-        //                    ", " + form);
-        // Object clojureForm = clojure.lang.Compiler.eval(form, false);
         Expr expr = analyze(form);
         return expr.eval();
     }
 
     // @todo Make private
     public static Expr analyze(Object form) {
-        IParser p;
-        // System.out.println("ANALYZE FORM: " + form.getClass().getName() + ", " + form);
         // @todo Make interfaces for these if appropriate and use them for dispatch
         if(form instanceof ColonList) {
-            // System.out.println("GERSHWIN Word Definition: " + form);
             return analyzeColon((ColonList) form);
         } else if(form instanceof QuotationList) {
-            // System.out.println("GERSHWIN Quotation: " + form);
             return analyzeQuotation((QuotationList) form);
         } else if(form instanceof Symbol) {
-            Symbol formSym = (Symbol) form;
-            String maybeVarName = formSym.toString();
-            Namespace currentClojureNs = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
-            // Consider whether suffix should be conditionally appended
-            Object maybeVar = clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(maybeVarName + GERSHWIN_VAR_SUFFIX));
-            if(maybeVar != null && maybeVar instanceof Var) {
-                Var aVar = (Var) maybeVar;
-                if(aVar.isBound() && aVar.deref() instanceof Word) {
-                    return analyzeWord((Word) aVar.deref());
-                } else {
-                    return analyzeClojure(form);
-                }
-            } else if((p = (IParser) specials.valAt(form)) != null) {
-                // return p.parse(context, form);
-                return p.parse(form);
-            } else {
-                return analyzeClojure(form);
-            }
+            return analyzeSymbol((Symbol) form);
         } else {
             return analyzeClojure(form);
         }
@@ -321,23 +329,36 @@ public class Compiler {
         return new QuotationExpr(form);
     }
 
+    public static Expr analyzeSymbol(Symbol form) {
+        IParser p;
+        String maybeVarName = form.toString();
+        Namespace currentClojureNs = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
+        // Consider whether suffix should be conditionally appended
+        Object maybeVar = clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(maybeVarName + GERSHWIN_VAR_SUFFIX));
+        if(maybeVar != null && maybeVar instanceof Var) {
+            Var aVar = (Var) maybeVar;
+            if(aVar.isBound() && aVar.deref() instanceof Word) {
+                return analyzeWord((Word) aVar.deref());
+            } else {
+                return analyzeClojure(form);
+            }
+        } else if((p = (IParser) specials.valAt(form)) != null) {
+            // return p.parse(context, form);
+            return p.parse(form);
+        } else {
+            return analyzeClojure(form);
+        }
+    }
+
     /**
      * Do something with an existing Gershwin word definition.
      */
     public static Expr analyzeWord(Word word) {
-        // System.out.println("ANALYZE WORD: " + word.getStackEffect() + ", " + word.getDefinition());
         return new WordExpr(word);
     }
 
     public static Expr analyzeClojure(Object form) {
         return new ClojureExpr(form);
-        // if(form instanceof ISeq && clojure.lang.RT.first(form).equals(FN)) {
-        //     System.out.println("FN FOUND");
-        //     return new FnExpr((ISeq) form);
-        // } else {
-        //     System.out.println("WHOA: " + form.getClass().getName());
-        //     return new ClojureExpr(form);
-        // }
     }
 
     // Try loading: (Compiler/load (java.io.StringReader. \"(fn [] (+ (Stack/popIt) (Stack/popIt)))\"))

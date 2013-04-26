@@ -12,7 +12,8 @@
  * Word evaluation/compilation
     * Let's try a metadata approach first. It's a bit of an abuse of the metadata facility in Clojure, but it gives us something to hang our hat on.
     * Might need to do check: if clojure form, wrap in an immediately-invoked clojure function, the function being evaluated but the fn application not.
-    * !! NEXT !! Get core.gwn loading again with new implementation of words and word definitions
+    * [DONE] Get core.gwn loading again with new implementation of words and word definitions
+    * !! NEXT !! Fix stack-effect metadata, make sure it's properly quoted so that, when accessed, it doesn't throw errors like "x is undefined"
  * Porting Clojure collection handling to Gershwin (NEXT: Basic math)
  * Porting Factor combinators to Gershwin (NEXT: Conditional combinators)
  * Testing "framework"

@@ -94,6 +94,7 @@ public class GershwinRepl {
                     evalRet = Compiler.eval(readRet);
                     handleEval(evalRet, w);
                 } catch(Exception e) {
+                    e.printStackTrace();
                     Exception rootException = (Exception) rootCause(e);
                     StackTraceElement[] tr = rootException.getStackTrace();
                     StackTraceElement el = null;

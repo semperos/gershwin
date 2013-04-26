@@ -253,6 +253,16 @@
   [x -- y]
   (ap gershwin-var) ;
 
+: if
+  [? then else]
+  (let [else-quot (pop-it)
+        then-quot (pop-it)
+        condition (pop-it)]
+    (if condition
+      (stack-void (.invoke then-quot))
+      (stack-void (.invoke else-quot)))) ;
+
+(stack-void (declare dup))
 : print-doc "Print documentation metadata for a Gershwin word with the given name. Accepts either a symbol or a var."
   [n --]
   dup symbol? < gershwin-var > < > if
@@ -288,6 +298,7 @@
         x (pop-it)]
     (conj-it y) (conj-it z) x) ;
 
+(stack-void (declare dip))
 : dupd "Duplicate second item on TOS in-place."
   [x y -- x x y]
   < dup > dip ;
@@ -345,15 +356,6 @@
 : pick "Duplicate third item on TOS."
   [x y z -- x y z x]
   (peek* (pop (st-pop))) ;
-
-: if
-  [? then else]
-  (let [else-quot (pop-it)
-        then-quot (pop-it)
-        condition (pop-it)]
-    (if condition
-      (stack-void (.invoke then-quot))
-      (stack-void (.invoke else-quot))))           ;
 
 : ? "Choose between t or f depending on truthiness of ?"
   [? t f]

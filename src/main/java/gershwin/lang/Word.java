@@ -2,7 +2,9 @@ package gershwin.lang;
 
 import clojure.lang.IFn;
 import clojure.lang.IObj;
+import clojure.lang.ISeq;
 import clojure.lang.IPersistentCollection;
+import clojure.lang.IPersistentList;
 import clojure.lang.IPersistentMap;
 
 import java.util.Iterator;
@@ -57,7 +59,17 @@ public class Word implements IInvocable, IObj {
      * Invoke a word definition by invoking the Clojure function that is its impl.
      */
     public Object invoke() {
-        return this.definitionFn.invoke();
+        Object def = this.definitionFn.invoke();
+        if(def instanceof IPersistentList) {
+            IPersistentList list = (IPersistentList) def;
+            Object ret = null;
+            for (ISeq s = list.seq(); s != null; s = s.next()) {
+                ret = Compiler.eval(s.first());
+            }
+            return ret;
+        } else {
+            return def;
+        }
     }
 
     public IObj withMeta(IPersistentMap meta){

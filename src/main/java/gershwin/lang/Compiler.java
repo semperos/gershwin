@@ -33,6 +33,8 @@ public class Compiler {
     static final Keyword STACK_EFFECT_KEY = Keyword.intern(null, "stack-effect");
     static final Symbol DEF = Symbol.intern("def");
     static final Symbol FN = Symbol.intern("fn");
+    static final Symbol LIST = Symbol.intern("list");
+    static final Symbol QUOTE = Symbol.intern("quote");
     static final Symbol DOT = Symbol.intern(".");
     static final Symbol IF = Symbol.intern("if*");
 
@@ -163,10 +165,7 @@ public class Compiler {
             for(int i = 0; i < rawForms.size(); i++) {
                 Object rawForm = rawForms.get(i);
                 // Expr expr = analyze(rawForm);
-                if(rawForm instanceof IPersistentList) {
-                    // Clojure code knows what it's doing
-                    definitionForms = conj(definitionForms, rawForm);
-                } else if(rawForm instanceof Symbol) {
+                if(rawForm instanceof Symbol) {
                     Expr expr = analyzeSymbol((Symbol) rawForm);
                     if(expr instanceof WordExpr) {
                         Word word = ((WordExpr) expr).getWord();
@@ -176,17 +175,17 @@ public class Compiler {
                         definitionForms = conj(definitionForms, rawForm);
                     }
                 } else {
-                    Object form = cons(DOT, cons(Symbol.intern("gershwin.lang.Stack"), cons(clojure.lang.RT.list(Symbol.intern("conjMutable"), rawForm), null)));
-                    definitionForms = conj(definitionForms, form);
+                    // Object form = cons(DOT, cons(Symbol.intern("gershwin.lang.Stack"), cons(clojure.lang.RT.list(Symbol.intern("conjMutable"), rawForm), null)));
+                    definitionForms = conj(definitionForms, rawForm);
                 }
             }
-            Object fnForm = cons(FN, cons(PersistentVector.EMPTY, clojure.lang.RT.seq(definitionForms)));
+            Object fnForm = cons(FN, cons(PersistentVector.EMPTY, cons(cons(LIST, clojure.lang.RT.seq(definitionForms)), null)));
             IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
             Word word = new Word(stackEffect, definition);
             if(wordMeta != null) {
-                createVar(gershwinName, word, wordMeta.assoc(STACK_EFFECT_KEY, stackEffect));
+                createVar(gershwinName, word, wordMeta.assoc(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect)));
             } else if(docString != null) {
-                createVar(gershwinName, word, docString, clojure.lang.RT.map(STACK_EFFECT_KEY, stackEffect));
+                createVar(gershwinName, word, docString, clojure.lang.RT.map(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect)));
             } else {
                 createVar(gershwinName, word, clojure.lang.RT.map());
             }

@@ -28,6 +28,18 @@ public class Stack {
     }
 
     /**
+     * Custom mutable conj, never conjes the special value
+     * :gershwin.core/stack-void
+     */
+    public static IPersistentStack conjIt(Object form) {
+        if(form == null
+           || !(form.equals(RT.STACK_VOID))) {
+            stackAtom.swap(CLOJURE_CONJ, form);
+        }
+        return (IPersistentStack) stackAtom.deref();
+    }
+
+    /**
      * Like Clojure's peek, but throws an exception if the stack is empty.
      */
     public static Object peek() {

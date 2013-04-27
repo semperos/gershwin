@@ -59,17 +59,7 @@ public class Word implements IInvocable, IObj {
      * Invoke a word definition by invoking the Clojure function that is its impl.
      */
     public Object invoke() {
-        Object def = this.definitionFn.invoke();
-        if(def instanceof IPersistentList) {
-            IPersistentList list = (IPersistentList) def;
-            Object ret = null;
-            for (ISeq s = list.seq(); s != null; s = s.next()) {
-                ret = Compiler.eval(s.first());
-            }
-            return ret;
-        } else {
-            return def;
-        }
+        return Compiler.eval(this.definitionFn.invoke());
     }
 
     public IObj withMeta(IPersistentMap meta){

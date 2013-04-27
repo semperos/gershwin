@@ -1,25 +1,22 @@
 package gershwin.lang;
 
+import clojure.lang.IFn;
+
 import java.util.Iterator;
 import java.util.List;
 
 public class Quotation implements IInvocable {
-    private final List quotationForms;
+    private final IFn definitionFn;
 
-    public Quotation(List quotationForms) {
-        this.quotationForms = quotationForms;
+    public Quotation(IFn definitionFn) {
+        this.definitionFn = definitionFn;
     }
 
-    public List getQuotationForms() {
-        return this.quotationForms;
+    public IFn getDuotationFn() {
+        return this.definitionFn;
     }
 
     public Object invoke() {
-        Object ret = null;
-        Iterator iter = quotationForms.iterator();
-        while (iter.hasNext()) {
-            ret = Compiler.eval(iter.next());
-        }
-        return ret;
+        return Compiler.eval(this.definitionFn.invoke());
     }
 }

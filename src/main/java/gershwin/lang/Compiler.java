@@ -35,6 +35,7 @@ public class Compiler {
     static final Symbol FN = Symbol.intern("fn");
     static final Symbol LIST = Symbol.intern("list");
     static final Symbol QUOTE = Symbol.intern("quote");
+    static final Symbol DO = Symbol.intern("do");
     static final Symbol DOT = Symbol.intern(".");
     static final Symbol IF = Symbol.intern("if*");
 
@@ -89,19 +90,9 @@ public class Compiler {
 
 	public Object eval() {
             Object clojureForm = clojure.lang.Compiler.eval(val(), false);
-            if(clojureForm == null) {
-                Stack.conjMutable(clojureForm);
-            } else if(!clojureForm.equals(RT.STACK_VOID)) {
-                Stack.conjMutable(clojureForm);
-            }
+            Stack.conjIt(clojureForm);
             return clojureForm;
 	}
-
-        // public static Expr parse(Object form) {
-        //     if(form instanceof Number) {
-        //         return new ClojureExpr(form);
-        //     }
-        // }
     }
 
     // public static class FnExpr implements Expr {
@@ -164,7 +155,6 @@ public class Compiler {
             IPersistentCollection definitionForms = PersistentVector.EMPTY;
             for(int i = 0; i < rawForms.size(); i++) {
                 Object rawForm = rawForms.get(i);
-                // Expr expr = analyze(rawForm);
                 if(rawForm instanceof Symbol) {
                     Expr expr = analyzeSymbol((Symbol) rawForm);
                     if(expr instanceof WordExpr) {
@@ -172,14 +162,26 @@ public class Compiler {
                         // Clojure turtles all the way down.
                         definitionForms = conj(definitionForms, clojure.lang.RT.list(word.getDefinitionFn()));
                     } else {
-                        definitionForms = conj(definitionForms, rawForm);
+                        ISeq form = withConjIt(rawForm);
+                        definitionForms = conj(definitionForms, form);
+                    }
+                } else if(rawForm instanceof QuotationList) {
+                    // @todo The QuotationExpr should be responsible for the same thing
+                    //   this expr is; compiling itself down to a function. Factor out
+                    //   this compile-to-function code as noted in the QuotationExpr.
+                    Expr expr = analyzeQuotation((QuotationList) rawForm);
+                    if(expr instanceof QuotationExpr) {
+                        Quotation quot = ((QuotationExpr) expr).getQuotation();
+                        // Clojure turtles all the way down, again.
+                        definitionForms = conj(definitionForms, clojure.lang.RT.list(quotation.getDefinitionFn()));
                     }
                 } else {
-                    // Object form = cons(DOT, cons(Symbol.intern("gershwin.lang.Stack"), cons(clojure.lang.RT.list(Symbol.intern("conjMutable"), rawForm), null)));
-                    definitionForms = conj(definitionForms, rawForm);
+                    ISeq form = withConjIt(rawForm);
+                    definitionForms = conj(definitionForms, form);
                 }
             }
-            Object fnForm = cons(FN, cons(PersistentVector.EMPTY, cons(cons(LIST, clojure.lang.RT.seq(definitionForms)), null)));
+            Object fnForm = cons(FN, cons(PersistentVector.EMPTY, clojure.lang.RT.seq(definitionForms)));
+            System.out.println("Word '" + nameSym.toString() + "' as: " + fnForm);
             IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
             Word word = new Word(stackEffect, definition);
             if(wordMeta != null) {
@@ -191,6 +193,22 @@ public class Compiler {
             }
             return word;
         }
+
+        /**
+         * "Compile" a non-Word form by wrapping it in a call to
+         * Stack.conjIt, so the return value of the given expression
+         * ends up on the stack. The Stack.conjIt method has built-in
+         * knowledge of :gershwin.core/stack-void and will not add it
+         * to the stack.
+         */
+        private ISeq withConjIt(Object rawForm) {
+            return clojure.lang.RT.list(DO,
+                                        cons(DOT,
+                                             cons(Symbol.intern("gershwin.lang.Stack"),
+                                                  cons(clojure.lang.RT.list(Symbol.intern("conjIt"), rawForm),
+                                                       null))),
+                                        RT.STACK_VOID);
+        }
     }
 
     /**
@@ -200,14 +218,20 @@ public class Compiler {
      */
     public static class QuotationExpr implements Expr {
         final IGershwinList l;
+        private Quotation q;
 
         public QuotationExpr(IGershwinList l) {
             this.l = l;
+            this.q = null;
         }
 
         public Object eval() {
             Quotation quotation = new Quotation(l);
-            Stack.conjMutable(quotation);
+            // @todo Factor out compilation-to-function code used to
+            //   create word definitions in ColonExpr. Do that here
+            //   for quotations, passing in to the Quotation ctor
+            //   that finished function.
+            Stack.conjIt(quotation);
             return quotation;
         }
     }

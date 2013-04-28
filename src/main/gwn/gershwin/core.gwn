@@ -11,6 +11,13 @@
     `(do ~@body ::stack-void))
   ::stack-void)
 
+! Support compilation of Quotations
+! (stack-void
+!  (defmethod print-dup gershwin.lang.Quotation [q stream]
+!    (.write stream "#=(gershwin.lang.Quotation. ")
+!    (.write stream q)
+!    (.write stream ")")))
+
 (stack-void
  (defmacro gershwin-ns
    "Wrap ns with stack void. Having do or some stack popping at the beginning of every file is ugly."

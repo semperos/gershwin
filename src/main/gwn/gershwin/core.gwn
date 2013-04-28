@@ -272,7 +272,7 @@
 (stack-void (declare dup))
 : print-doc "Print documentation metadata for a Gershwin word with the given name. Accepts either a symbol or a var."
   [n --]
-  dup symbol? < gershwin-var > < > if
+  dup symbol? < var > < > if
   meta :doc invoke-kw println ;
 
 ! ## Shuffle words ##

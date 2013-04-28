@@ -64,6 +64,8 @@ public class Compiler {
                 QuotationExpr quotExpr = (QuotationExpr) analyzeQuotation((QuotationList) rawForm);
                 Quotation quot = quotExpr.getQuotation();
                 // Clojure turtles all the way down, again.
+                // @todo Simplistic alternative would be to construct
+                //   an IPersistentList of (Quotation. (fn [] ...))
                 ISeq form = withConjIt(quot.getDefinitionFn());
                 definitionForms = conj(definitionForms, form);
             } else {

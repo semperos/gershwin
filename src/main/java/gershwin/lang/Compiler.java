@@ -44,6 +44,53 @@ public class Compiler {
         .create(IF, new IfExpr.Parser());
 
     /**
+     * Simple compilation to a Clojure function.
+     */
+    public static Object compileDefinition(List rawForms) {
+        IPersistentCollection definitionForms = PersistentVector.EMPTY;
+        for(int i = 0; i < rawForms.size(); i++) {
+            Object rawForm = rawForms.get(i);
+            if(rawForm instanceof Symbol) {
+                Expr expr = analyzeSymbol((Symbol) rawForm);
+                if(expr instanceof WordExpr) {
+                    Word word = ((WordExpr) expr).getWord();
+                    // Clojure turtles all the way down.
+                    definitionForms = conj(definitionForms, clojure.lang.RT.list(word.getDefinitionFn()));
+                } else {
+                    ISeq form = withConjIt(rawForm);
+                    definitionForms = conj(definitionForms, form);
+                }
+            } else if(rawForm instanceof QuotationList) {
+                QuotationExpr quotExpr = (QuotationExpr) analyzeQuotation((QuotationList) rawForm);
+                Quotation quot = quotExpr.getQuotation();
+                // Clojure turtles all the way down, again.
+                ISeq form = withConjIt(quot.getDefinitionFn());
+                definitionForms = conj(definitionForms, form);
+            } else {
+                ISeq form = withConjIt(rawForm);
+                definitionForms = conj(definitionForms, form);
+            }
+        }
+       return cons(FN, cons(PersistentVector.EMPTY, clojure.lang.RT.seq(definitionForms)));
+    }
+
+    /**
+     * "Compile" a non-Word form by wrapping it in a call to
+     * Stack.conjIt, so the return value of the given expression
+     * ends up on the stack. The Stack.conjIt method has built-in
+     * knowledge of :gershwin.core/stack-void and will not add it
+     * to the stack.
+     */
+    private static ISeq withConjIt(Object rawForm) {
+        return clojure.lang.RT.list(DO,
+                                    cons(DOT,
+                                         cons(Symbol.intern("gershwin.lang.Stack"),
+                                              cons(clojure.lang.RT.list(Symbol.intern("conjIt"), rawForm),
+                                                   null))),
+                                    RT.STACK_VOID);
+    }
+
+    /**
      * Instead of having separate top-level {@code analyzeFoo}
      * methods for every possible language form,
      * {@code Expr} classes can contain an implemention
@@ -95,28 +142,6 @@ public class Compiler {
 	}
     }
 
-    // public static class FnExpr implements Expr {
-    //     final ISeq fnForm;
-
-    //     public FnExpr(ISeq fnForm) {
-    //         this.fnForm = fnForm;
-    //     }
-
-    //     /**
-    //      * Clojure functions are evaluated as soon as they are
-    //      * encountered and the return value is put on the stack.
-    //      *
-    //      * Unless I'm crazy, this is the right way to go, and there will
-    //      * need to be a separate idea of a "quotation" that acts as an
-    //      * evaluation-delayer, so that Gershwin controls the semantics of
-    //      * of that eventual evaluation, and not Clojure itself.
-    //      */
-    //     public Object eval() {
-    //         IFn clojureForm = (IFn) clojure.lang.Compiler.eval(this.fnForm, false);
-    //         return clojureForm.invoke();
-    //     }
-    // }
-
     /**
      * Word-creation expr
      *
@@ -152,36 +177,7 @@ public class Compiler {
             // What the reader gives us
             List rawForms = this.l.subList(2, l.size());
             // What we're going to store as the word's definition
-            IPersistentCollection definitionForms = PersistentVector.EMPTY;
-            for(int i = 0; i < rawForms.size(); i++) {
-                Object rawForm = rawForms.get(i);
-                if(rawForm instanceof Symbol) {
-                    Expr expr = analyzeSymbol((Symbol) rawForm);
-                    if(expr instanceof WordExpr) {
-                        Word word = ((WordExpr) expr).getWord();
-                        // Clojure turtles all the way down.
-                        definitionForms = conj(definitionForms, clojure.lang.RT.list(word.getDefinitionFn()));
-                    } else {
-                        ISeq form = withConjIt(rawForm);
-                        definitionForms = conj(definitionForms, form);
-                    }
-                } else if(rawForm instanceof QuotationList) {
-                    // @todo The QuotationExpr should be responsible for the same thing
-                    //   this expr is; compiling itself down to a function. Factor out
-                    //   this compile-to-function code as noted in the QuotationExpr.
-                    Expr expr = analyzeQuotation((QuotationList) rawForm);
-                    if(expr instanceof QuotationExpr) {
-                        Quotation quot = ((QuotationExpr) expr).getQuotation();
-                        // Clojure turtles all the way down, again.
-                        definitionForms = conj(definitionForms, clojure.lang.RT.list(quotation.getDefinitionFn()));
-                    }
-                } else {
-                    ISeq form = withConjIt(rawForm);
-                    definitionForms = conj(definitionForms, form);
-                }
-            }
-            Object fnForm = cons(FN, cons(PersistentVector.EMPTY, clojure.lang.RT.seq(definitionForms)));
-            System.out.println("Word '" + nameSym.toString() + "' as: " + fnForm);
+            Object fnForm = compileDefinition(rawForms);
             IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
             Word word = new Word(stackEffect, definition);
             if(wordMeta != null) {
@@ -193,22 +189,6 @@ public class Compiler {
             }
             return word;
         }
-
-        /**
-         * "Compile" a non-Word form by wrapping it in a call to
-         * Stack.conjIt, so the return value of the given expression
-         * ends up on the stack. The Stack.conjIt method has built-in
-         * knowledge of :gershwin.core/stack-void and will not add it
-         * to the stack.
-         */
-        private ISeq withConjIt(Object rawForm) {
-            return clojure.lang.RT.list(DO,
-                                        cons(DOT,
-                                             cons(Symbol.intern("gershwin.lang.Stack"),
-                                                  cons(clojure.lang.RT.list(Symbol.intern("conjIt"), rawForm),
-                                                       null))),
-                                        RT.STACK_VOID);
-        }
     }
 
     /**
@@ -217,22 +197,26 @@ public class Compiler {
      * @todo Make private
      */
     public static class QuotationExpr implements Expr {
-        final IGershwinList l;
-        private Quotation q;
+        final QuotationList l;
+        private Quotation quot;
 
-        public QuotationExpr(IGershwinList l) {
+        public Quotation getQuotation() {
+            return this.quot;
+        }
+
+        public QuotationExpr(QuotationList l) {
             this.l = l;
-            this.q = null;
+            // What we're going to store as the word's definition
+            Object fnForm = compileDefinition(l);
+            IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
+            this.quot = new Quotation(definition);
+            // Used for print output
+            this.quot.setQuotationForms(l);
         }
 
         public Object eval() {
-            Quotation quotation = new Quotation(l);
-            // @todo Factor out compilation-to-function code used to
-            //   create word definitions in ColonExpr. Do that here
-            //   for quotations, passing in to the Quotation ctor
-            //   that finished function.
-            Stack.conjIt(quotation);
-            return quotation;
+            Stack.conjIt(quot);
+            return quot;
         }
     }
 

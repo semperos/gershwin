@@ -1,7 +1,14 @@
-(gershwin-ns gershwin.string
+(ns gershwin.string
   (:refer-clojure :exclude (replace reverse))
-  (:require [clojure.string :as str])
+  (:require [gershwin.core :refer :all]
+            [clojure.string :as str])
   (:import (java.util.regex Pattern Matcher)
            clojure.lang.LazilyPersistentVector))
 
 : reverse [s -- s] (ap str/reverse) ;
+
+: replace [s match repl -- s]
+  (let [repl (pop-it)
+        match (pop-it)
+        s (pop-it)]
+    (str/replace s match repl)) ;

@@ -413,7 +413,7 @@ java -cp clojure.jar clojure.main -i init.clj script.clj args...")
   [& body]
   `(stack-void
     (ns ~@body)
-    (refer 'gershwin.core)))
+    (clojure.core/refer 'gershwin.core)))
 
 (defn gershwin-resolve
   "Resolve the `name` of a language form as a var, checking Gershwin var definitions with a fallback to Clojure ones. Gershwin does some mangling of names to prevent clashes with core Clojure forms, so this replicates that."

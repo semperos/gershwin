@@ -269,12 +269,6 @@
       (stack-void (.invoke then-quot))
       (stack-void (.invoke else-quot)))) ;
 
-(stack-void (declare dup))
-: print-doc "Print documentation metadata for a Gershwin word with the given name. Accepts either a symbol or a var."
-  [n --]
-  dup symbol? < var > < > if
-  meta :doc invoke-kw println ;
-
 ! ## Shuffle words ##
 
 ! Basics are: drop, swap, dup, rot
@@ -299,16 +293,11 @@
 ! @todo Will add warnings about using things like rot, dupd if/when
 !   we get Factor-style dataflow combinators implemented
 : rot "Rotate the items on TOS as shown in stack effect."
-  [x y z -- y z x]
+[x y z -- y z x]
   (let [z (pop-it)
         y (pop-it)
         x (pop-it)]
     (conj-it y) (conj-it z) x) ;
-
-(stack-void (declare dip))
-: dupd "Duplicate second item on TOS in-place."
-  [x y -- x x y]
-  < dup > dip ;
 
 ! Factor extensions to base set
 
@@ -364,18 +353,6 @@
   [x y z -- x y z x]
   (peek* (pop (st-pop))) ;
 
-: ? "Choose between t or f depending on truthiness of ?"
-  [? t f]
-  rot < drop > < nip > if ;
-
-: or "Outputs first truthy value, or false if neither is truthy."
-  [x y -- ?]
-  dupd ? ;
-
-: and "If both values are true, outputs TOS. Else returns false."
-  [x y -- ?]
-  over ? ;
-
 ! ## Dataflow Combinators ##
 
 ! ### Preservering combinators ###
@@ -398,6 +375,10 @@
 : dip4 "Remove the second, third, and fourth items from TOS, execute the quotation on TOS, then restore the second, third, and fourth items on TOS."
   [w x y z quot -- w x y z]
   swap < dip3 > dip ;
+
+: dupd "Duplicate second item on TOS in-place."
+  [x y -- x x y]
+  < dup > dip ;
 
 : keep "As opposed to dip, which removes the second item before executing the quotation, keep keeps the second item on the stack for the quotation's invocation, but then also adds it back again after the quotation has been executed."
   [..a x quot -> ( ..a x -- ..b ) -- ..b x]
@@ -463,6 +444,20 @@
 
 ! NOTE: The `spread` word requires words we haven't implemented yet. Punting til later.
 
+! Some booleans we'll need.
+
+: ? "Choose between t or f depending on truthiness of ?"
+  [? t f]
+  rot < drop > < nip > if ;
+
+: or "Outputs first truthy value, or false if neither is truthy."
+  [x y -- ?]
+  dupd ? ;
+
+: and "If both values are true, outputs TOS. Else returns false."
+  [x y -- ?]
+  over ? ;
+
 ! ### Apply combinators ###
 
 ! Apply combinators apply a single quotation to multiple values. In this way, they are equivalent to using the spread combinators with each quotation being identical. The ampersand `&` denotes apply combinators (The `@` from Factor cannot be used as a Clojure/Gershwin symbol character).
@@ -504,3 +499,10 @@
 : odd? [n -- ?] (ap odd?) ;
 
 : even? [n -- ?] (ap even?) ;
+
+! Interactive development niceties
+
+: print-doc "Print documentation metadata for a Gershwin word with the given name. Accepts either a symbol or a var."
+  [n --]
+  dup symbol? < var > < > if
+  meta :doc invoke-kw println ;

@@ -124,6 +124,7 @@
                 </goals>
                 <configuration>
                   <mainClass>${gershwinMainClass}</mainClass>
+                  <args>-m gershwin.replloader</args>
                 </configuration>
               </execution>
             </executions>

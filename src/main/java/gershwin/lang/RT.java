@@ -85,11 +85,10 @@ public class RT {
                                        clojure.lang.RT.LOADER_SUFFIX) != null);
 	}
 	if(!loaded && gwnURL != null) {
-            // When Gershwin supports AOT compilation:
-            // if(clojure.lang.RT.booleanCast(clojure.lang.Compiler.COMPILE_FILES.deref()))
-            //     compile(gwnfile);
-            // else
-            loadResourceScript(clojure.lang.RT.class, gwnfile);
+            if(clojure.lang.RT.booleanCast(clojure.lang.Compiler.COMPILE_FILES.deref()))
+                compile(gwnfile);
+            else
+                loadResourceScript(clojure.lang.RT.class, gwnfile);
 	}
 	else if(!loaded && failIfNotFound)
             throw new FileNotFoundException(String.format("Could not locate %s or %s on classpath: ", classfile, gwnfile));
@@ -162,44 +161,20 @@ public class RT {
                 w.write(' ');
         }
     }
-}
 
-/**
-// From clojure.lang.RT. Note the inclusion of a definition for load-file.
-static{
-	Keyword arglistskw = Keyword.intern(null, "arglists");
-	Symbol namesym = Symbol.intern("name");
-	OUT.setTag(Symbol.intern("java.io.Writer"));
-	CURRENT_NS.setTag(Symbol.intern("clojure.lang.Namespace"));
-	AGENT.setMeta(map(DOC_KEY, "The agent currently running an action on this thread, else nil"));
-	AGENT.setTag(Symbol.intern("clojure.lang.Agent"));
-	MATH_CONTEXT.setTag(Symbol.intern("java.math.MathContext"));
-	Var nv = Var.intern(CLOJURE_NS, NAMESPACE, bootNamespace);
-	nv.setMacro();
-	Var v;
-	v = Var.intern(CLOJURE_NS, IN_NAMESPACE, inNamespace);
-	v.setMeta(map(DOC_KEY, "Sets *ns* to the namespace named by the symbol, creating it if needed.",
-	              arglistskw, list(vector(namesym))));
-	v = Var.intern(CLOJURE_NS, LOAD_FILE,
-	               new AFn(){
-		               public Object invoke(Object arg1) {
-			               try
-				               {
-				               return Compiler.loadFile((String) arg1);
-				               }
-			               catch(IOException e)
-				               {
-				               throw Util.sneakyThrow(e);
-				               }
-		               }
-	               });
-	v.setMeta(map(DOC_KEY, "Sequentially read and evaluate the set of forms contained in the file.",
-	              arglistskw, list(vector(namesym))));
-	try {
-		doInit();
+    static void compile(String gwnfile) throws IOException {
+        InputStream ins = clojure.lang.RT.resourceAsStream(baseLoader(), gwnfile);
+	if(ins != null) {
+            try {
+                Compiler.compile(new InputStreamReader(ins, UTF8), gwnfile,
+                                 gwnfile.substring(1 + gwnfile.lastIndexOf("/")));
+            }
+            finally {
+                ins.close();
+            }
+
 	}
-	catch(Exception e) {
-		throw Util.sneakyThrow(e);
-	}
+	else
+            throw new FileNotFoundException("Could not locate Gershwin resource on classpath: " + gwnfile);
+    }
 }
-**/

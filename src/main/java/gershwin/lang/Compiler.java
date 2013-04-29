@@ -2,6 +2,7 @@ package gershwin.lang;
 
 import clojure.lang.Fn;
 import clojure.lang.IFn;
+import clojure.lang.IMapEntry;
 import clojure.lang.IObj;
 import clojure.lang.IPersistentCollection;
 import clojure.lang.IPersistentList;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -37,11 +39,15 @@ public class Compiler {
     static final Symbol QUOTE = Symbol.intern("quote");
     static final Symbol DO = Symbol.intern("do");
     static final Symbol DOT = Symbol.intern(".");
-    static final Symbol IF = Symbol.intern("if*");
+    // @todo Perhaps should be namespaced
+    static final Keyword WORD_KW = Keyword.intern(null, "word");
+    // static final Symbol IF = Symbol.intern("if*");
+    // static final public Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("gershwin.core")),
+    //                                                   Symbol.intern("*gershwin-compile-path*"), null).setDynamic();
 
-    static final public IPersistentMap specials =
-        PersistentHashMap
-        .create(IF, new IfExpr.Parser());
+    // static final public IPersistentMap specials =
+    //     PersistentHashMap
+    //     .create(IF, new IfExpr.Parser());
 
     /**
      * Simple compilation to a Clojure function.
@@ -65,7 +71,9 @@ public class Compiler {
                 Quotation quot = quotExpr.getQuotation();
                 // Clojure turtles all the way down, again.
                 // @todo Simplistic alternative would be to construct
-                //   an IPersistentList of (Quotation. (fn [] ...))
+                //   an IPersistentList of (Quotation. (fn [] ...)). Write now this
+                //   function has invoke() called, which just happens to work since
+                //   quotations are always zero-arity functions.
                 ISeq form = withConjIt(quot.getDefinitionFn());
                 definitionForms = conj(definitionForms, form);
             } else {
@@ -73,7 +81,91 @@ public class Compiler {
                 definitionForms = conj(definitionForms, form);
             }
         }
-       return cons(FN, cons(PersistentVector.EMPTY, clojure.lang.RT.seq(definitionForms)));
+        return cons(FN, cons(PersistentVector.EMPTY, clojure.lang.RT.seq(definitionForms)));
+    }
+
+    public static Object emitDefinition(List rawForms) {
+        IPersistentCollection definitionForms = PersistentVector.EMPTY;
+        for(int i = 0; i < rawForms.size(); i++) {
+            Object rawForm = rawForms.get(i);
+            if(rawForm instanceof Symbol) {
+                Expr expr = analyzeSymbol((Symbol) rawForm);
+                if(expr instanceof WordExpr) {
+                    Word word = ((WordExpr) expr).getWord();
+                    // Clojure turtles all the way down.
+                    definitionForms = conj(definitionForms, word.getDefinitionForm());
+                } else {
+                    ISeq form = withConjIt(rawForm);
+                    definitionForms = conj(definitionForms, form);
+                }
+            } else if(rawForm instanceof QuotationList) {
+                QuotationExpr quotExpr = (QuotationExpr) analyzeQuotation((QuotationList) rawForm);
+                Quotation quot = quotExpr.getQuotation();
+                // Clojure turtles all the way down, again.
+                ISeq form = withConjIt(quot.getDefinitionForm());
+                definitionForms = conj(definitionForms, form);
+            } else {
+                ISeq form = withConjIt(rawForm);
+                definitionForms = conj(definitionForms, form);
+            }
+        }
+        return cons(FN, cons(PersistentVector.EMPTY, clojure.lang.RT.seq(definitionForms)));
+    }
+
+    public static Object compile(Reader rdr, String sourcePath, String sourceName) throws IOException {
+        Object EOF = new Object();
+        Object ret = null;
+        LineNumberingPushbackReader pushbackReader =
+            (rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
+            new LineNumberingPushbackReader(rdr);
+        List<String> lines = new ArrayList<String>();
+        String internalName = sourcePath
+            .replace(File.separator, "/")
+            .substring(0, sourcePath.lastIndexOf('.'));
+        try {
+            for(Object r = Parser.read(pushbackReader, false, EOF, false); r != EOF;
+                r = Parser.read(pushbackReader, false, EOF, false)) {
+                compile1(lines, r);
+            }
+            writeClojureFile(internalName, lines);
+        } catch(Parser.ReaderException e) {
+            throw new CompilerException(sourcePath, e.line, e.column, e.getCause());
+        }
+        return ret;
+    }
+
+    static void compile1(List<String> lines, Object form) {
+        Expr expr = analyze(form);
+        lines.add(expr.emit());
+        // Hmmm
+        // expr.eval();
+    }
+
+    public static void writeClojureFile(String internalName, List<String> lines) throws IOException {
+        String genPath = (String) clojure.lang.Compiler.COMPILE_PATH.deref();
+        if(genPath == null)
+            throw Util.runtimeException("*gershwin-compile-path* not set");
+        String [] dirs = internalName.split("/");
+        String p = genPath;
+        for(int i = 0; i < dirs.length - 1; i++) {
+            p += File.separator + dirs[i];
+            (new File(p)).mkdir();
+        }
+        String path = genPath + File.separator + internalName + ".clj";
+        File cf = new File(path);
+        cf.createNewFile();
+        FileWriter cfw = new FileWriter(cf);
+        StringBuilder sb = new StringBuilder();
+        for(String s : lines) {
+            sb.append(s).append("\n");
+        }
+        String sourceCode = sb.toString();
+        try {
+            cfw.write(sourceCode);
+            cfw.flush();
+        } finally {
+            cfw.close();
+        }
     }
 
     /**
@@ -111,7 +203,7 @@ public class Compiler {
     interface Expr {
 	Object eval() ;
 
-	// void emit(C context, ObjExpr objx, GeneratorAdapter gen);
+	String emit();
 
 	// boolean hasJavaClass() ;
 
@@ -139,9 +231,28 @@ public class Compiler {
 
 	public Object eval() {
             Object clojureForm = clojure.lang.Compiler.eval(val(), false);
-            Stack.conjIt(clojureForm);
+            boolean invoked = false;
+            if(clojureForm instanceof Var) {
+                Var aVar = (Var) clojureForm;
+                IPersistentMap metadata = aVar.meta();
+                if(metadata.containsKey(WORD_KW)) {
+                    IMapEntry entry = metadata.entryAt(WORD_KW);
+                    if(clojure.lang.RT.booleanCast(entry.getValue())) {
+                        // This is a word fn, invoke it immediately
+                        invoked = true;
+                        IFn fn = (IFn) aVar.deref();
+                        fn.invoke();
+                    }
+                }
+            }
+            if(!invoked)
+                Stack.conjIt(clojureForm);
             return clojureForm;
 	}
+
+        public String emit() {
+            return this.x.toString();
+        }
     }
 
     /**
@@ -181,7 +292,9 @@ public class Compiler {
             // What we're going to store as the word's definition
             Object fnForm = compileDefinition(rawForms);
             IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
-            Word word = new Word(stackEffect, definition);
+            // Clojure source
+            Object defForm = emitDefinition(rawForms);
+            Word word = new Word(stackEffect, definition, defForm);
             if(wordMeta != null) {
                 createVar(gershwinName, word, wordMeta.assoc(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect)));
             } else if(docString != null) {
@@ -190,6 +303,40 @@ public class Compiler {
                 createVar(gershwinName, word, clojure.lang.RT.map());
             }
             return word;
+        }
+
+        public String emit() {
+            Symbol nameSym = (Symbol) this.l.get(0);
+            Symbol gershwinName = Symbol.intern(nameSym.getName() + GERSHWIN_VAR_SUFFIX);
+            IPersistentMap wordMeta = null;
+            String docString = null;
+            if (this.l.get(1) instanceof IPersistentMap) {
+                // Shortcut to add metadata
+                wordMeta = (IPersistentMap) this.l.get(1);
+                this.l.remove(1);
+            } else if (this.l.get(1) instanceof String) {
+                // Shortcut to add a docstring
+                docString = (String) this.l.get(1);
+                this.l.remove(1);
+            }
+            IPersistentCollection stackEffect = (IPersistentCollection) this.l.get(1);
+            // What the reader gives us
+            List rawForms = this.l.subList(2, l.size());
+            // What we're going to store as the word's definition.
+            Object fnForm = emitDefinition(rawForms);
+            // @todo Attach metadata
+            Object varForm = clojure.lang.RT.list(DEF, Symbol.intern("^:word"), gershwinName, fnForm);
+            return varForm.toString();
+            // IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
+            // Word word = new Word(stackEffect, definition);
+            // if(wordMeta != null) {
+            //     createVar(gershwinName, word, wordMeta.assoc(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect)));
+            // } else if(docString != null) {
+            //     createVar(gershwinName, word, docString, clojure.lang.RT.map(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect)));
+            // } else {
+            //     createVar(gershwinName, word, clojure.lang.RT.map());
+            // }
+            // return word;
         }
     }
 
@@ -211,7 +358,8 @@ public class Compiler {
             // What we're going to store as the word's definition
             Object fnForm = compileDefinition(l);
             IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
-            this.quot = new Quotation(definition);
+            Object defForm = emitDefinition(l);
+            this.quot = new Quotation(definition, defForm);
             // Used for print output
             this.quot.setQuotationForms(l);
         }
@@ -219,6 +367,10 @@ public class Compiler {
         public Object eval() {
             Stack.conjIt(quot);
             return quot;
+        }
+
+        public String emit() {
+            return this.quot.getDefinitionForm().toString();
         }
     }
 
@@ -247,53 +399,60 @@ public class Compiler {
         public Object eval() {
             return word.invoke();
         }
+
+        public String emit() {
+            // We need to make sure that, when we encounter a word,
+            // it already has its definition forms saved off in the object.
+            // Look at ColonExpr's own eval/emit methods and make sure this happens.
+            return word.getDefinitionForm().toString();
+        }
     }
 
     /**
      * Here to be instructive, fuels if*. Regular if is simply
      * implemented in Clojure, since it relies on quotations.
      */
-    public static class IfExpr implements Expr {
-        final Object condition;
-        final Quotation thenQuotation;
-        final Quotation elseQuotation;
+    // public static class IfExpr implements Expr {
+    //     final Object condition;
+    //     final Quotation thenQuotation;
+    //     final Quotation elseQuotation;
 
-        public IfExpr(Object condition, Quotation thenQuotation, Quotation elseQuotation) {
-            this.condition = condition;
-            this.thenQuotation = thenQuotation;
-            this.elseQuotation = elseQuotation;
-        }
+    //     public IfExpr(Object condition, Quotation thenQuotation, Quotation elseQuotation) {
+    //         this.condition = condition;
+    //         this.thenQuotation = thenQuotation;
+    //         this.elseQuotation = elseQuotation;
+    //     }
 
-        public Object eval() {
-            if(condition != null && condition != Boolean.FALSE)
-                return thenQuotation.invoke();
-            return elseQuotation.invoke();
-        }
+    //     public Object eval() {
+    //         if(condition != null && condition != Boolean.FALSE)
+    //             return thenQuotation.invoke();
+    //         return elseQuotation.invoke();
+    //     }
 
-        static class Parser implements IParser {
-            /**
-             * Unlike in Clojure, these forms have already been
-             * analyzed and are on the stack in evaluated form, so there's
-             * no need to analyze these forms and create expr's again.
-             */
-            public Expr parse(Object form) {
-                IPersistentStack sCdr = Stack.pop();
-                IPersistentStack sCddr = sCdr.pop();
-                Object condition = sCddr.peek();
-                Object thenQ = sCdr.peek();
-                Object elseQ = Stack.peek();
-                if(!(thenQ instanceof Quotation)) {
-                    throw Util.runtimeException("The 'then' branch of an if expression must be a quotation.");
-                } else if(!(elseQ instanceof Quotation)) {
-                    throw Util.runtimeException("The 'else' branch of an if expression must be a quotation.");
-                }
-                // Easier to use immutable methods above and then just
-                // pop everything off the stack in one go.
-                for(int i = 0; i < 3; i++) { Stack.popIt(); }
-                return new IfExpr(condition, (Quotation) thenQ, (Quotation) elseQ);
-            }
-        }
-    }
+    //     static class Parser implements IParser {
+    //         /**
+    //          * Unlike in Clojure, these forms have already been
+    //          * analyzed and are on the stack in evaluated form, so there's
+    //          * no need to analyze these forms and create expr's again.
+    //          */
+    //         public Expr parse(Object form) {
+    //             IPersistentStack sCdr = Stack.pop();
+    //             IPersistentStack sCddr = sCdr.pop();
+    //             Object condition = sCddr.peek();
+    //             Object thenQ = sCdr.peek();
+    //             Object elseQ = Stack.peek();
+    //             if(!(thenQ instanceof Quotation)) {
+    //                 throw Util.runtimeException("The 'then' branch of an if expression must be a quotation.");
+    //             } else if(!(elseQ instanceof Quotation)) {
+    //                 throw Util.runtimeException("The 'else' branch of an if expression must be a quotation.");
+    //             }
+    //             // Easier to use immutable methods above and then just
+    //             // pop everything off the stack in one go.
+    //             for(int i = 0; i < 3; i++) { Stack.popIt(); }
+    //             return new IfExpr(condition, (Quotation) thenQ, (Quotation) elseQ);
+    //         }
+    //     }
+    // }
 
     /**
      * Deal with a single language form.
@@ -346,14 +505,19 @@ public class Compiler {
         Object maybeVar = clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(maybeVarName + GERSHWIN_VAR_SUFFIX));
         if(maybeVar != null && maybeVar instanceof Var) {
             Var aVar = (Var) maybeVar;
-            if(aVar.isBound() && aVar.deref() instanceof Word) {
-                return analyzeWord((Word) aVar.deref());
+            if(aVar.isBound()) {
+                if(aVar.deref() instanceof Word) {
+                    return analyzeWord((Word) aVar.deref());
+                } else {
+                    return analyzeClojure(aVar);
+                }
             } else {
                 return analyzeClojure(form);
             }
-        } else if((p = (IParser) specials.valAt(form)) != null) {
-            // return p.parse(context, form);
-            return p.parse(form);
+            // If we need to support any more special forms:
+            // } else if((p = (IParser) specials.valAt(form)) != null) {
+            //     // return p.parse(context, form);
+            //     return p.parse(form);
         } else {
             return analyzeClojure(form);
         }
@@ -419,7 +583,7 @@ public class Compiler {
      * Will leave commented-out line for adding it directly to a custom
      * {@link clojure.lang.IObj} like {@link Word}
      */
-    public static void createVar(Symbol name, IObj form, IPersistentMap formMeta) {
+    public static void createVar(Symbol name, Object form, IPersistentMap formMeta) {
         // IObj formWithMeta = form.withMeta(formMeta);
         IObj varForm = (IObj) clojure.lang.RT.list(DEF, name, form);
         Var newVar = (Var) clojure.lang.Compiler.eval(varForm, false);

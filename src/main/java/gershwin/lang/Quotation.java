@@ -7,10 +7,16 @@ import java.util.List;
 
 public class Quotation implements IInvocable {
     private QuotationList quotationForms = null;
+    private Object definitionForm = null;
     private final IFn definitionFn;
 
     public Quotation(IFn definitionFn) {
         this.definitionFn = definitionFn;
+    }
+
+    public Quotation(IFn definitionFn, Object definitionForm) {
+        this.definitionFn = definitionFn;
+        this.definitionForm = definitionForm;
     }
 
     public QuotationList getQuotationForms() {
@@ -19,6 +25,14 @@ public class Quotation implements IInvocable {
 
     public void setQuotationForms(QuotationList quotationForms) {
         this.quotationForms = quotationForms;
+    }
+
+    public Object getDefinitionForm() {
+        return this.definitionForm;
+    }
+
+    public void setDefinitionForm(Object definitionForm) {
+        this.definitionForm = definitionForm;
     }
 
     public IFn getDefinitionFn() {

@@ -10,6 +10,12 @@ Run a REPL:
 mvn -Prepl test
 ```
 
+For a better REPL experience, I suggest running this through rlwrap or ledit. My personal ledit incantation looks like this:
+
+```
+ledit -x -h ~/.gershwin_repl_history mvn -Prepl test
+```
+
 Or build the uberjar:
 
 ```

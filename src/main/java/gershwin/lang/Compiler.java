@@ -21,6 +21,7 @@ import static clojure.lang.RT.cons;
 import static clojure.lang.RT.conj;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,13 +42,15 @@ public class Compiler {
     static final Symbol DOT = Symbol.intern(".");
     // @todo Perhaps should be namespaced
     static final Keyword WORD_KW = Keyword.intern(null, "word");
-    // static final Symbol IF = Symbol.intern("if*");
-    // static final public Var COMPILE_PATH = Var.intern(Namespace.findOrCreate(Symbol.intern("gershwin.core")),
-    //                                                   Symbol.intern("*gershwin-compile-path*"), null).setDynamic();
-
-    // static final public IPersistentMap specials =
-    //     PersistentHashMap
-    //     .create(IF, new IfExpr.Parser());
+    // DynamicClassLoader
+    static final public Var LOADER = Var.create().setDynamic();
+    static final public Var LOCAL_ENV = Var.create(null).setDynamic();
+    static final public Var LOOP_LOCALS = Var.create().setDynamic();
+    static final public Var NEXT_LOCAL_NUM = Var.create(0).setDynamic();
+    static final public Var CONSTANTS = Var.create().setDynamic();
+    static final public Var CONSTANT_IDS = Var.create().setDynamic();
+    static final public Var VARS = Var.create().setDynamic();
+    static final public Var KEYWORDS = Var.create().setDynamic();
 
     /**
      * Simple compilation to a Clojure function.
@@ -70,10 +73,6 @@ public class Compiler {
                 QuotationExpr quotExpr = (QuotationExpr) analyzeQuotation((QuotationList) rawForm);
                 Quotation quot = quotExpr.getQuotation();
                 // Clojure turtles all the way down, again.
-                // @todo Simplistic alternative would be to construct
-                //   an IPersistentList of (Quotation. (fn [] ...)). Write now this
-                //   function has invoke() called, which just happens to work since
-                //   quotations are always zero-arity functions.
                 ISeq form = withConjIt(quot.getDefinitionFn());
                 definitionForms = conj(definitionForms, form);
             } else {
@@ -118,11 +117,24 @@ public class Compiler {
         LineNumberingPushbackReader pushbackReader =
             (rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
             new LineNumberingPushbackReader(rdr);
-        List<String> lines = new ArrayList<String>();
-        String internalName = sourcePath
-            .replace(File.separator, "/")
-            .substring(0, sourcePath.lastIndexOf('.'));
+	Var.pushThreadBindings(
+                               clojure.lang.RT.mapUniqueKeys(
+                                                LOCAL_ENV, null,
+                                                LOOP_LOCALS, null,
+                                                NEXT_LOCAL_NUM, 0,
+                                                clojure.lang.RT.READEVAL, clojure.lang.RT.T,
+                                                clojure.lang.RT.CURRENT_NS, clojure.lang.RT.CURRENT_NS.deref(),
+                                                CONSTANTS, PersistentVector.EMPTY,
+                                                CONSTANT_IDS, new IdentityHashMap(),
+                                                KEYWORDS, PersistentHashMap.EMPTY,
+                                                VARS, PersistentHashMap.EMPTY
+                                                //    ,LOADER, RT.makeClassLoader()
+                                                ));
         try {
+            List<String> lines = new ArrayList<String>();
+            String internalName = sourcePath
+                .replace(File.separator, "/")
+                .substring(0, sourcePath.lastIndexOf('.'));
             for(Object r = Parser.read(pushbackReader, false, EOF, false); r != EOF;
                 r = Parser.read(pushbackReader, false, EOF, false)) {
                 compile1(lines, r);
@@ -130,15 +142,23 @@ public class Compiler {
             writeClojureFile(internalName, lines);
         } catch(Parser.ReaderException e) {
             throw new CompilerException(sourcePath, e.line, e.column, e.getCause());
+        } finally {
+            Var.popThreadBindings();
         }
         return ret;
     }
 
     static void compile1(List<String> lines, Object form) {
-        Expr expr = analyze(form);
-        lines.add(expr.emit());
-        // Hmmm
-        // expr.eval();
+        Var.pushThreadBindings(
+                               clojure.lang.RT.map(LOADER, clojure.lang.RT.makeClassLoader())
+                               );
+        try {
+            Expr expr = analyze(form);
+            lines.add(expr.emit());
+            expr.eval();
+        } finally {
+            Var.popThreadBindings();
+        }
     }
 
     public static void writeClojureFile(String internalName, List<String> lines) throws IOException {
@@ -408,6 +428,24 @@ public class Compiler {
         }
     }
 
+    public static boolean isWord(Object form) {
+        boolean ret = false;
+        if(form instanceof Word)
+            return true;
+        if(form instanceof Var) {
+            Var aVar = (Var) form;
+            IPersistentMap metadata = aVar.meta();
+            if(metadata.containsKey(WORD_KW)) {
+                IMapEntry entry = metadata.entryAt(WORD_KW);
+                return clojure.lang.RT.booleanCast(entry.getValue());
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Here to be instructive, fuels if*. Regular if is simply
      * implemented in Clojure, since it relies on quotations.
@@ -454,14 +492,29 @@ public class Compiler {
     //     }
     // }
 
+    public static Object eval(Object form) {
+        return eval(form, true);
+    }
+
     /**
      * Deal with a single language form.
      *
      * Currently uses Clojure to evaluate form. This eval
      */
-    public static Object eval(Object form) {
-        Expr expr = analyze(form);
-        return expr.eval();
+    public static Object eval(Object form, boolean freshLoader) {
+        boolean createdLoader = false;
+        //!LOADER.isBound())
+	if(true) {
+            Var.pushThreadBindings(clojure.lang.RT.map(LOADER, clojure.lang.RT.makeClassLoader()));
+            createdLoader = true;
+        }
+        try {
+            Expr expr = analyze(form);
+            return expr.eval();
+        } finally {
+            if(createdLoader)
+                Var.popThreadBindings();
+        }
     }
 
     // @todo Make private
@@ -499,10 +552,10 @@ public class Compiler {
 
     public static Expr analyzeSymbol(Symbol form) {
         IParser p;
-        String maybeVarName = form.toString();
+        String maybeVarName = form.toString() + GERSHWIN_VAR_SUFFIX;
         Namespace currentClojureNs = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
         // Consider whether suffix should be conditionally appended
-        Object maybeVar = clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(maybeVarName + GERSHWIN_VAR_SUFFIX));
+        Object maybeVar = clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(maybeVarName));
         if(maybeVar != null && maybeVar instanceof Var) {
             Var aVar = (Var) maybeVar;
             if(aVar.isBound()) {
@@ -546,6 +599,13 @@ public class Compiler {
 	LineNumberingPushbackReader pushbackReader =
             (rdr instanceof LineNumberingPushbackReader) ? (LineNumberingPushbackReader) rdr :
             new LineNumberingPushbackReader(rdr);
+        Var.pushThreadBindings(
+                               clojure.lang.RT.mapUniqueKeys(LOADER, clojure.lang.RT.makeClassLoader(),
+                                                             LOCAL_ENV, null,
+                                                             LOOP_LOCALS, null,
+                                                             NEXT_LOCAL_NUM, 0,
+                                                             clojure.lang.RT.READEVAL, clojure.lang.RT.T,
+                                                             clojure.lang.RT.CURRENT_NS, clojure.lang.RT.CURRENT_NS.deref()));
 	try {
             for(Object r = Parser.read(pushbackReader, false, EOF, false);
                 r != EOF;
@@ -560,6 +620,8 @@ public class Compiler {
         }
 	catch(Parser.ReaderException e) {
             throw new CompilerException(sourcePath, e.line, e.column, e.getCause());
+        } finally {
+            Var.popThreadBindings();
         }
 	return ret;
     }

@@ -53,6 +53,9 @@ public class GershwinRepl {
     }
 
     public static void main(String[] args) throws ClassNotFoundException, IOException {
+        // Clojure's repl fn does this at the beginning for side-effects.
+        // ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        // Thread.currentThread().setContextClassLoader(new clojure.lang.DynamicClassLoader(cl));
 	LineNumberingPushbackReader r = new LineNumberingPushbackReader(new InputStreamReader(System.in));
 	OutputStreamWriter w = new OutputStreamWriter(System.out);
 	Object readRet = null;

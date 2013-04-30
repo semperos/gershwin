@@ -1,7 +1,7 @@
 (do
   (ns gershwin.core
-    (:require [clojure.core :refer :all])
-    (:import [gershwin.lang Stack Stack$StackUnderflowException]))
+    (:require [clojure.core :refer :all]
+              [gershwin.rt :refer :all]))
   :gershwin.core/stack-void)
 
 ! ## Invokables ##
@@ -40,7 +40,7 @@
 
 ! ## Utilities ##
 
-: clear [] (stack-void (Stack/clear)) ;
+: clear [] (stack-void (stack-clear)) ;
 
 : pr [n --] (stack-void (ap pr*)) ;
 

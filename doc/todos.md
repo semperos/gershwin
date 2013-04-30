@@ -6,14 +6,8 @@
 
 ## Features ##
 
- * Managing namespaces, requires and imports via Gershwin instead of Clojure interop
-    * Current Status: Need to work out referring gershwin.core when using gershwin-ns for new namespaces.
-    * Try direct require, refer, figure out why words aren't being auto-executed (being put on stack instead) (SOLUTION: This was due to how we were checking for whether or not something was a var and then resolving it, which leads us to separate problem of properly compiling fn's on the fly via Clojure).
- * Word evaluation/compilation
-    * Let's try a metadata approach first. It's a bit of an abuse of the metadata facility in Clojure, but it gives us something to hang our hat on.
-    * Might need to do check: if clojure form, wrap in an immediately-invoked clojure function, the function being evaluated but the fn application not.
-    * [DONE] Get core.gwn loading again with new implementation of words and word definitions
-    * !! NEXT !! Fix stack-effect metadata, make sure it's properly quoted so that, when accessed, it doesn't throw errors like "x is undefined"
+ * Reuse clojure.main `repl` fn, supplying the necessary read/eval/print functions to use Gershwin
+ * Build orchestration to ensure all Gershwin code has been compiled to Clojure
  * Porting Clojure collection handling to Gershwin (NEXT: Basic math)
  * Porting Factor combinators to Gershwin (NEXT: Conditional combinators)
  * Testing "framework"
@@ -37,6 +31,9 @@ At first glance, this seems like a interesting prospect to avoid a lot of menial
 
 ## Done ##
 
+ * [DONE] Figure out why Clojure's load doesn't put you in the ns, but Gershwin's does (needed to add Var.pushThreadBindings bindings in appropriate spots in compiler)
+ * [DONE] Elementary compilation
+ * [DONE] Starting support for Gershwin/Clojure namespaces
  * [DONE] Make exception handling saner at REPL (i.e. catch them)
  * [DONE] Do same parsing for < as we do for : so that < can still be used for names.
  * [DONE] Copy read1 into Parser from LispReader

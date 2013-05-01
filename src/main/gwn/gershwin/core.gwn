@@ -272,9 +272,9 @@
   [u v w x y z p q r --]
   < dip4 > dip2 bi2* ;
 
-! NOTE: The `spread` word requires words we haven't implemented yet. Punting til later.
+!! NOTE: The `spread` word requires words we haven't implemented yet. Punting til later.
 
-! Some booleans we'll need.
+!! Booleans
 
 : ? "Choose between t or f depending on truthiness of ?"
   [? t f]

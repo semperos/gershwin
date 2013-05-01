@@ -8,14 +8,27 @@
 : suite-passes? "Returns true if all tests pass"
   [?s -- ?]
   ! @todo Implement in Gershwin when map/filter are ready
-  (let [results (pop-it)]
-    (if (empty? (filter false? results))
-      :pass
+  (let [results (pop-it)
+        failures (filter false? results)]
+    (if (empty? failures)
       (do
+        (println (str (count results) " tests PASSED."))
+        :pass)
+      (do
+        (println (str (count failures) " tests FAILED."))
         (conj-it results)
         :fail))) ;
 
-: unit-test [?s quot quot -- ?] dip invoke = conj ;
+: unit-test
+  "Take two quotations, ensure quot-a is what quot-b puts on the stack after being invoked. Supports one nested layer of quotation, such that if quot-a and quot-b evaluate to quotations themselves, the inner quotations will be invoked and their outputs checked for equality."
+  [?s quot-a quot-b -- ?]
+  dip invoke
+  ! If values are functions, do one level of invocation
+  ! and test equivalence of that output.
+  dup2 < function? > bi& and
+  ! If function, invoke, else just test with =
+  < < invoke > bi& > when
+  = conj ;
 
 : run-suite
   "Wrap a set of unit tests as necessary to run them and collect results."

@@ -40,6 +40,7 @@ public class Compiler {
     static final Symbol QUOTE = Symbol.intern("quote");
     static final Symbol DO = Symbol.intern("do");
     static final Symbol DOT = Symbol.intern(".");
+    static final Symbol NS = Symbol.intern("ns");
     // @todo Perhaps should be namespaced
     static final Keyword WORD_KW = Keyword.intern(null, "word");
     // DynamicClassLoader
@@ -250,7 +251,24 @@ public class Compiler {
         }
 
 	public Object eval() {
-            Object clojureForm = clojure.lang.Compiler.eval(val(), false);
+            Object form = null;
+            Object rawForm = val();
+            // Handle the ns macro as a special case, to avoid having
+            // to clear the stack when requiring in namespaces.
+            if(rawForm instanceof IPersistentList) {
+                IPersistentList forms = (IPersistentList) rawForm;
+                Object fst = clojure.lang.RT.first(forms);
+                if(fst instanceof Symbol && fst.equals(NS)) {
+                    // Wrap this in a do form and return :gershwin.core/stack-void
+                    // to avoid putting anything on the stack.
+                    form = clojure.lang.RT.list(DO, forms, RT.STACK_VOID);
+                }
+            }
+            if(form == null)
+                form = rawForm;
+            Object clojureForm = clojure.lang.Compiler.eval(form, false);
+            // Handle functions with ^:word metadata, which are Gershwin words
+            // and should be invoked.
             boolean invoked = false;
             if(clojureForm instanceof Var) {
                 Var aVar = (Var) clojureForm;

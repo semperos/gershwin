@@ -4,6 +4,11 @@
               [gershwin.rt :refer :all]))
   :gershwin.core/stack-void)
 
+: gershwin-require "Compile and load a Gershwin namespace"
+  [arg --]
+  ! @todo Determine why a nil is put on stack
+  (stack-void (ap gershwin-require)) drop ;
+
 ! ## Invokables ##
 
 : invoke "Invoke an IInvocable (quotations). The quotation itself puts things on the stack, so the result of the invocation itself is ignored."

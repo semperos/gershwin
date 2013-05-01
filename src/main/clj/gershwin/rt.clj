@@ -176,9 +176,19 @@
   lib)
 
 (defn gershwin-require
-  [& args]
-  (let [lib (if (coll? (first args))
-              (ffirst args)
-              (first args))]
-    (gershwin-compile lib)
-    (apply require args)))
+  "For now, this support requiring a single lib at a time. "
+  [spec]
+  (if (coll? spec)
+    (let [suffix gershwin.lang.RT/GERSHWIN_SUFFIX
+          lib (first spec)
+          kw (-> spec next first)
+          words (let [ws (-> spec next next first)]
+                  (when-not (keyword? ws) ;; e.g., :all
+                    (map #(symbol (str % suffix)) ws)))]
+      (gershwin-compile lib)
+      (if words
+        (require [lib kw words])
+        (require spec)))
+    (do
+      (gershwin-compile spec)
+      (require spec))))

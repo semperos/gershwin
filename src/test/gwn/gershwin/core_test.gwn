@@ -3,12 +3,10 @@
 
 '[gershwin.test :refer :all] gershwin-require
 
-: run [-- ?]
-  start-suite
+: suite [-- ?]
   < 42 > < 21 21 + > unit-test
   < {:lang "gershwin"} > < {:lang "clojure"} :lang "gershwin" assoc > unit-test
   < [1 2 3 4] > < [1 2 3] 4 conj > unit-test
-  < '(1 2 3 4) > < 1 '(2 3 4) cons > unit-test
+  < '(1 2 3 4) > < 1 '(2 3 4) cons > unit-test ;
   ! @todo Current impl only supports single value returns
   ! < 4 3 > < 3 4 swap > unit-test
-  suite-passes? ;

@@ -73,6 +73,10 @@
   [x -- ?]
   (ap symbol?) ;
 
+: function? "True if TOS is a fn"
+  [x -- ?]
+  (ap fn?) ;
+
 : var "Get var for TOS. Currently uses `resolve` as `var` causes an error."
   [x -- y]
   (ap gershwin-resolve) ;

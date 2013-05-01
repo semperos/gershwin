@@ -4,7 +4,22 @@
 '[gershwin.test :refer :all] gershwin-require
 
 : suite [-- ?]
+  !! Math
   < 42 > < 21 21 + > unit-test
+
+  !! Booleans
+  < true > < 42 boolean > unit-test
+  < true > < 0 boolean > unit-test
+  < true > < "" boolean > unit-test
+  < true > < [] boolean > unit-test
+  < true > < {} boolean > unit-test
+  < false > < nil boolean > unit-test
+  < false > < false boolean > unit-test
+  < "yes" > < 42 "yes" "no" ? > unit-test
+  < < "yes" > > < 42 < "yes" > < "no" > ? > unit-test
+  < "yes" > < 42 < "yes" > < "no" > if > unit-test
+
+  !! Collections
   < {:lang "gershwin"} > < {:lang "clojure"} :lang "gershwin" assoc > unit-test
   < [1 2 3 4] > < [1 2 3] 4 conj > unit-test
   < '(1 2 3 4) > < 1 '(2 3 4) cons > unit-test ;

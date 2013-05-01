@@ -91,6 +91,10 @@
   "Remove top two items from TOS, swap, then apply the function."
   [a-fn] (let [a (pop-it) b (pop-it)] (a-fn b a)))
 
+(defn pop-n-swap2
+  "x y z --> z y x and pass it that way to a Clojure function."
+  [a-fn] (let [z (pop-it) y (pop-it) x (pop-it)] (a-fn x y z)))
+
 ;;;;
 ;; BEGIN Copying of Clojure's core.clj, to allow loading using !
 ;; Gershwin's loader instead of Clojure's.                     !

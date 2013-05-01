@@ -94,6 +94,11 @@
       (stack-void (.invoke then-quot))
       (stack-void (.invoke else-quot)))) ;
 
+: when
+  "'if' with no 'else' branch"
+  [? then -- ...]
+  < > if ;
+
 ! ## Shuffle words ##
 
 ! Basics are: drop, swap, dup, rot

@@ -317,11 +317,33 @@
 
 : * [n n -- n] (ap2 *) ;
 
+: lt [n n -- ?] (pop-n-swap <) ;
+
+: gt [n n -- ?] (pop-n-swap >) ;
+
+: lt= [n n -- ?] (pop-n-swap <=) ;
+
+: gt= [n n -- ?] (pop-n-swap >=) ;
+
 : div [n n -- n] (pop-n-swap /) ;
 
 : odd? [n -- ?] (ap odd?) ;
 
 : even? [n -- ?] (ap even?) ;
+
+! Equality
+
+: = [n -- ?] (ap2 =) ;
+
+! Collections
+
+: assoc [coll k v -- coll] (pop-n-swap2 assoc) ;
+
+: conj [coll x -- coll] (pop-n-swap conj) ;
+
+: cons [x coll -- coll] (pop-n-swap cons) ;
+
+: dissoc [coll k -- coll] (pop-n-swap dissoc) ;
 
 ! Interactive development niceties
 

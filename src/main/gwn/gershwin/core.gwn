@@ -211,15 +211,15 @@
   < dup > dip ;
 
 : keep "As opposed to dip, which removes the second item before executing the quotation, keep keeps the second item on the stack for the quotation's invocation, but then also adds it back again after the quotation has been executed."
-  [..a x quot -> ( ..a x -- ..b ) -- ..b x]
+  [..a x quot -- ( ..a x -- ..b ) -- ..b x]
   over < invoke > dip ;
 
 : keep2 "Like keep, but restores first and second items on TOS after invoking quotation with them."
-  [..a x y quot -> ( ..a x y -- ..b ) -- ..b x y]
+  [..a x y quot <--> ( ..a x y -- ..b ) -- ..b x y]
   < dup2 > dip dip2 ;
 
 : keep3 "Like keep, but restores first, second, and third items on TOS after invoking quotation with them."
-  [..a x y z quot -> ( ..a x y z -- ..b ) -- ..b x y z]
+  [..a x y z quot <--> ( ..a x y z -- ..b ) -- ..b x y z]
   < dup3 > dip dip3 ;
 
 ! ### Cleave combinators ###

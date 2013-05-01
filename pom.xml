@@ -42,7 +42,13 @@
           <sourceDirectories>
             <sourceDirectory>src/main/clj</sourceDirectory>
             <sourceDirectory>src/main/gwn</sourceDirectory>
+            <sourceDirectory>src/test/gwn</sourceDirectory>
           </sourceDirectories>
+          <!-- This is what it should be -->
+          <!-- <testSourceDirectories> -->
+          <!--   <testSourceDirectory>src/test/clj</testSourceDirectory> -->
+          <!--   <testSourceDirectory>src/test/gwn</testSourceDirectory> -->
+          <!-- </testSourceDirectories> -->
         </configuration>
         <executions>
           <execution>
@@ -60,6 +66,7 @@
         <version>1.8</version>
         <executions>
           <execution>
+            <id>add-main-sources</id>
             <phase>generate-sources</phase>
             <goals>
               <goal>add-source</goal>
@@ -67,7 +74,18 @@
             <configuration>
               <sources>
                 <source>src/main/gwn</source>
-                <source>src/main/resources</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-test-sources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-test-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/test/gwn</source>
               </sources>
             </configuration>
           </execution>
@@ -113,7 +131,13 @@
               <sourceDirectories>
                 <sourceDirectory>src/main/clj</sourceDirectory>
                 <sourceDirectory>src/main/gwn</sourceDirectory>
+                <sourceDirectory>src/test/gwn</sourceDirectory>
               </sourceDirectories>
+              <!-- This is what it should be -->
+              <!-- <testSourceDirectories> -->
+              <!--   <testSourceDirectory>src/test/clj</testSourceDirectory> -->
+              <!--   <testSourceDirectory>src/test/gwn</testSourceDirectory> -->
+              <!-- </testSourceDirectories> -->
             </configuration>
             <executions>
               <execution>

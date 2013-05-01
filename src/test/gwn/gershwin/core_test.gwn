@@ -1,0 +1,10 @@
+(ns gershwin.core-test
+  (:require [gershwin.core :refer :all]))
+
+'[gershwin.test :refer :all] gershwin-require
+
+: run [-- ?]
+  start-suite
+  < 42 > < 21 21 + > unit-test
+  < {:lang "gershwin"} > < {:lang "clojure"} :lang "gershwin" assoc > unit-test
+  suite-passes? ;

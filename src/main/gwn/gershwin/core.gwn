@@ -1,13 +1,11 @@
-(do
-  (ns gershwin.core
-    (:require [clojure.core :refer :all]
-              [gershwin.rt :refer :all]))
-  :gershwin.core/stack-void)
+(ns gershwin.core
+  (:require [clojure.core :refer :all]
+            [gershwin.rt :refer :all]))
 
 : gershwin-require "Compile and load a Gershwin namespace"
   [arg --]
   ! @todo Determine why a nil is put on stack
-  (stack-void (ap gershwin-require)) drop ;
+  (stack-void (ap gershwin-require)) ;
 
 ! ## Invokables ##
 

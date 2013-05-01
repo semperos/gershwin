@@ -183,7 +183,7 @@
           lib (first spec)
           kw (-> spec next first)
           words (let [ws (-> spec next next first)]
-                  (when-not (keyword? ws) ;; e.g., :all
+                  (when (coll? ws) ;; e.g., :all
                     (map #(symbol (str % suffix)) ws)))]
       (gershwin-compile lib)
       (if words

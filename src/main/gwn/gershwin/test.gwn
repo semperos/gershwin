@@ -17,6 +17,13 @@
 
 : unit-test [?s quot quot -- ?] dip invoke = conj ;
 
+: run-suite
+  "Wrap a set of unit tests as necessary to run them and collect results."
+  [quot -- ?]
+  start-suite
+  swap invoke
+  suite-passes? ;
+
 ! : run-suite
 !   "Load a test namespace, then run its run word and gather results."
 !   [sym -- ?]

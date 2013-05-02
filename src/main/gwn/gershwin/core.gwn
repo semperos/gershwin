@@ -2,12 +2,16 @@
   (:require [clojure.core :refer :all]
             [gershwin.rt :refer :all]))
 
-: gershwin-require "Compile and load a Gershwin namespace"
+!! ## Code loading ##
+
+: load [s --] (stack-void (ap gershwin-load)) ;
+
+: require "Compile and load a Gershwin namespace"
   [arg --]
   ! @todo Determine why a nil is put on stack
   (stack-void (ap gershwin-require)) ;
 
-! ## Invokables ##
+!! ## Invokables ##
 
 : invoke "Invoke an IInvocable (quotations). The quotation itself puts things on the stack, so the result of the invocation itself is ignored."
   [quot -- ...]
@@ -35,13 +39,7 @@
   [m kw --]
   invoke-apply ;
 
-! ## Code loading ##
-
-: load [s --] (stack-void (ap gershwin-load)) ;
-
-: load-paths [ss --] (apply gershwin-load (pop-it)) ;
-
-! ## Utilities ##
+!! ## Utilities ##
 
 : clear [] (stack-void (stack-clear)) ;
 
@@ -99,15 +97,15 @@
   [? then -- ...]
   < > if ;
 
-! ## Shuffle words ##
+!! ## Shuffle words ##
 
-! Basics are: drop, swap, dup, rot
+!! Basics are: drop, swap, dup, rot
 
 : drop "Remove the item at the TOS."
   [x --]
   (do (pop-it) ::stack-void) ;
 
-! Common synonym
+!! Common synonym
 : . [x --] drop ;
 
 : swap "Swaps the two items on TOS."
@@ -120,8 +118,8 @@
   [x -- x x]
   (st-peek) ;
 
-! @todo Will add warnings about using things like rot, dupd if/when
-!   we get Factor-style dataflow combinators implemented
+!! @todo Will add warnings about using things like rot, dupd if:when
+!!   we get Factor-style dataflow combinators implemented
 : rot "Rotate the items on TOS as shown in stack effect."
 [x y z -- y z x]
   (let [z (pop-it)
@@ -129,12 +127,12 @@
         x (pop-it)]
     (conj-it y) (conj-it z) x) ;
 
-! Factor extensions to base set
+!! Factor extensions to base set
 
-! These include: drop2, drop3, nip, nip2, dup2, dup3, over, over2, pick
-! Note: 'pick' differs from what it might mean in most Forths
-! @todo Factor implements these as primitives, even though they could be implemented
-!   with the basic shuffle words above. Consider.
+!! These include: drop2, drop3, nip, nip2, dup2, dup3, over, over2, pick
+!! Note: 'pick' differs from what it might mean in most Forths
+!! @todo Factor implements these as primitives, even though they could be implemented
+!!   with the basic shuffle words above. Consider.
 
 : drop2 "Remove top two items from TOS."
   [x y --]
@@ -183,9 +181,9 @@
   [x y z -- x y z x]
   (peek* (pop (st-pop))) ;
 
-! ## Dataflow Combinators ##
+!! ## Dataflow Combinators ##
 
-! ### Preservering combinators ###
+!! ### Preservering combinators ###
 
 : dip "Remove second item from TOS, execute the quotation on TOS, then restore second item on TOS."
   [x quot -- x]
@@ -222,9 +220,9 @@
   [..a x y z quot <--> ( ..a x y z -- ..b ) -- ..b x y z]
   < dup3 > dip dip3 ;
 
-! ### Cleave combinators ###
+!! ### Cleave combinators ###
 
-! Cleave operators mean: take a single piece of data and apply n number of quotations to it. These are common patterns for repeated uses of `keep`, which should be evident from their implementation.
+!! Cleave operators mean: take a single piece of data and apply n number of quotations to it. These are common patterns for repeated uses of `keep`, which should be evident from their implementation.
 
 : bi "Invoke the two quotations on TOS sequentially with the third item on TOS present for both invocations."
   [x p q --]
@@ -250,11 +248,11 @@
   [x y z p q r --]
   < < keep3 > dip keep3 > dip invoke ;
 
-! NOTE: The `cleave` word requires words we haven't implemented yet. Punting til later.
+!! NOTE: The `cleave` word requires words we haven't implemented yet. Punting til later.
 
-! ### Spread combinators ###
+!! ### Spread combinators ###
 
-! Spread combinators apply n number of quotations to n (or 2*n) number of values. These are common patterns for repeated uses of dip. The asterisk `*` denotes spread combinators.
+!! Spread combinators apply n number of quotations to n (or 2*n) number of values. These are common patterns for repeated uses of dip. The asterisk `*` denotes spread combinators.
 
 : bi* "Apply the two quotations to the two values in order."
   [x y p q --]
@@ -290,9 +288,9 @@
 
 : boolean [x -- ?] < true > < false > if ;
 
-! ### Apply combinators ###
+!! ### Apply combinators ###
 
-! Apply combinators apply a single quotation to multiple values. In this way, they are equivalent to using the spread combinators with each quotation being identical. The ampersand `&` denotes apply combinators (The `@` from Factor cannot be used as a Clojure/Gershwin symbol character).
+!! Apply combinators apply a single quotation to multiple values. In this way, they are equivalent to using the spread combinators with each quotation being identical. The ampersand `&` denotes apply combinators (The `@` from Factor cannot be used as a Clojure:Gershwin symbol character).
 
 : bi& "Apply the quotation to the top two items on TOS in order."
   [x y quot --]
@@ -318,7 +316,7 @@
   [x y quot -- ?]
   bi& or ;
 
-! Basic math
+!! Basic math
 
 : + [n n -- n] (ap2 +) ;
 
@@ -340,11 +338,11 @@
 
 : even? [n -- ?] (ap even?) ;
 
-! Equality
+!! Equality
 
 : = [n -- ?] (ap2 =) ;
 
-! Collections
+!! Collections
 
 : assoc [coll k v -- coll] (pop-n-swap2 assoc) ;
 
@@ -354,7 +352,7 @@
 
 : dissoc [coll k -- coll] (pop-n-swap dissoc) ;
 
-! Interactive development niceties
+!! Interactive development niceties
 
 : print-doc "Print documentation metadata for a Gershwin word with the given name. Accepts either a symbol or a var."
   [n --]

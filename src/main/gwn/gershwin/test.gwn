@@ -7,7 +7,7 @@
 
 : suite-passes? "Returns true if all tests pass"
   [?s -- ?]
-  ! @todo Implement in Gershwin when map/filter are ready
+  !! @todo Implement in Gershwin when map:filter are ready
   (let [results (pop-it)
         failures (filter false? results)]
     (if (empty? failures)
@@ -23,10 +23,10 @@
   "Take two quotations, ensure quot-a is what quot-b puts on the stack after being invoked. Supports one nested layer of quotation, such that if quot-a and quot-b evaluate to quotations themselves, the inner quotations will be invoked and their outputs checked for equality."
   [?s quot-a quot-b -- ?]
   dip invoke
-  ! If values are functions, do one level of invocation
-  ! and test equivalence of that output.
+  !! If values are functions, do one level of invocation
+  !! and test equivalence of that output.
   dup2 < function? > bi& and
-  ! If function, invoke, else just test with =
+  !! If function, invoke, else just test with =
   < < invoke > bi& > when
   = conj ;
 
@@ -37,10 +37,10 @@
   swap invoke
   suite-passes? ;
 
-! : run-suite
-!   "Load a test namespace, then run its run word and gather results."
-!   [sym -- ?]
-!   dup gershwin-require
-!   start-suite
-!   < (resolve (symbol (str (pop-it) "/run"))) > dip nip
-!   suite-passes? ;
+!! : run-suite
+!!   "Load a test namespace, then run its run word and gather results."
+!!   [sym -- ?]
+!!   dup gershwin-require
+!!   start-suite
+!!   < (resolve (symbol (str (pop-it) ":run"))) > dip nip
+!!   suite-passes? ;

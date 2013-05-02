@@ -6,6 +6,7 @@
 
 ## Features ##
 
+ * Unit tests need a "parsing word" that can take in a quotation, execute it, and return what it would put on the stack in a collection. This can be accomplished by a word savvy enough to put something of its own (unique) on the stack, then execute a quotation, then take things off the stack until the special item is reached.
  * Reuse clojure.main `repl` fn, supplying the necessary read/eval/print functions to use Gershwin
  * Build orchestration to ensure all Gershwin code has been compiled to Clojure
  * Porting Clojure collection handling to Gershwin (NEXT: Basic math)

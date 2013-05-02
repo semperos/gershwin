@@ -34,8 +34,12 @@
 (defvar gershwin-builtins
   '("swap" "dup" "dup2" "dup3" "drop" "drop2" "drop3" "nip" "nip2" "rot"
     "over" "over2" "pick" "dip" "dip2" "dip3" "dip4" "dupd" "keep" "keep2" "keep3"
-    "bi" "bi2" "bi3" "tri" "tri2" "tri3" "bi*" "bi2*" "tri*" "tri2*" "?" "or" "and"
-    "boolean" "bi&" "bi2&" "tri&" "tri2&" "both?" "either?")
+    "bi" "bi2" "bi3" "tri" "tri2" "tri3" "bi*" "bi2*" "tri*" "tri2*" "boolean"
+    "bi&" "bi2&" "tri&" "tri2&" "both?" "either?" "+" "-" "*" "div" "lt"
+    "gt" "lt=" "gt=" "odd?" "even?" "=" "assoc" "conj" "cons" "dissoc" "print-doc"
+    "meta" "invoke" "invoke-apply2" "invoke-apply3" "invoke-swap" "invoke-kw"
+    "load" "require" "clear" "pr" "prn" "print" "println" "type" "class" "symbol" "symbol?"
+    "function?" "var" "gershwin-var" "if" "when" "?" "or" "and")
   "Words built into the core of Gershwin")
 
 ;;;###autoload
@@ -43,15 +47,21 @@
   clojure-mode "Gershwin"
   "Major mode for Gershwin code"
 
-  (cl-flet ((star-fn (item) (replace-regexp-in-string "\\*" "\\\\*" item))
-            (qmark-fn (item) (replace-regexp-in-string "\\?" "\\\\?" item)))
-    (let ((groomed-words (mapcar (lambda (item) (qmark-fn (star-fn item)))
-                                 gershwin-builtins)))
-      (font-lock-add-keywords 'gershwin-mode
-                              (append '(": ")
-                                      (mapcar (lambda (item)
-                                                (concat "\\b" item "\\b"))
-                                              groomed-words)))))
+  (cl-flet ((escape-chars
+             (word)
+             (replace-regexp-in-string
+              (regexp-opt '("*" "+" "?"))
+              (lambda (match)
+                (concat "\\\\" match))
+              word)))
+    (font-lock-add-keywords
+     'gershwin-mode
+     (append '(": ")
+             (mapcar (lambda (item)
+                       (concat "\\b" item "\\b"))
+                     (mapcar (lambda (x)
+                               (escape-chars x))
+                             gershwin-builtins)))))
 
   (add-hook 'gershwin-mode-hook (lambda () (local-set-key (kbd "C-c a") 'paredit-wrap-angled)))
   (add-hook 'gershwin-mode-hook (lambda ()

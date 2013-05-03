@@ -118,7 +118,7 @@
   [x -- x x]
   (st-peek) ;
 
-!! @todo Will add warnings about using things like rot, dupd if:when
+!! @todo Will add warnings about using things like rot, dupd if/when
 !!   we get Factor-style dataflow combinators implemented
 : rot "Rotate the items on TOS as shown in stack effect."
 [x y z -- y z x]

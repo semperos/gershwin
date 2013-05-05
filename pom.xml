@@ -8,6 +8,13 @@
   <name>gershwin</name>
   <description>Stack-based programming language with Clojure underpinnings</description>
   <url>https://github.com/semperos/gershwin</url>
+  <developers>
+    <developer>
+      <name>Daniel Gregoire</name>
+      <email>daniel.l.gregoire@gmail.com</email>
+      <timezone>-5</timezone>
+    </developer>
+  </developers>
   <licenses>
     <license>
       <name>Eclipse Public License</name>

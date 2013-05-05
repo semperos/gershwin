@@ -8,6 +8,13 @@
 
 ;; Originally contributed by Stephen C. Gilardi
 
+;; GERSHWIN NOTE:
+;;
+;; This is copied here to give Gershwin a proper Clojure runtime
+;; entry-point. This namespace ensures that necessary vars are bound
+;; and provides mechanisms for starting a REPL, running a script,
+;; or running a main class.
+
 (ns ^{:doc "Top-level main function for Clojure REPL and scripts."
        :author "Stephen C. Gilardi and Rich Hickey"}
   gershwin.main

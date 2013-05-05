@@ -7,7 +7,6 @@ import java.io.IOException;
 
 public class main {
     final static private Var REQUIRE = clojure.lang.RT.var("clojure.core", "require");
-    final static private Symbol CLOJURE_MAIN = Symbol.intern("clojure.main");
     final static private Symbol GERSHWIN_MAIN = Symbol.intern("gershwin.main");
     final static private Var MAIN = clojure.lang.RT.var("gershwin.main", "main");
 

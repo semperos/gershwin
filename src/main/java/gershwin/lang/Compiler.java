@@ -306,13 +306,26 @@ public class Compiler {
         }
 
         /**
+         * Handle formatting {@link Symbol}s with the Gershwin
+         * suffix, excluding definitions of {@code -main}.
+         */
+        private Symbol gershwinSymbol(Symbol word) {
+            Symbol jvmMain = Symbol.intern("-main");
+            if(word.equals(jvmMain)) {
+                return word;
+            } else {
+                return Symbol.intern(word.getName() + GERSHWIN_VAR_SUFFIX);
+            }
+        }
+
+        /**
          * Add a word definition to the current Clojure namespace
          * as a {@link clojure.lang.Var}. Words are instances of
          * {@link Word}.
          */
         public Object eval() {
             Symbol nameSym = (Symbol) this.l.get(0);
-            Symbol gershwinName = Symbol.intern(nameSym.getName() + GERSHWIN_VAR_SUFFIX);
+            Symbol gershwinName = gershwinSymbol(nameSym);
             IPersistentMap wordMeta = null;
             String docString = null;
             if (this.l.get(1) instanceof IPersistentMap) {
@@ -345,7 +358,7 @@ public class Compiler {
 
         public String emit() {
             Symbol nameSym = (Symbol) this.l.get(0);
-            Symbol gershwinName = Symbol.intern(nameSym.getName() + GERSHWIN_VAR_SUFFIX);
+            Symbol gershwinName = gershwinSymbol(nameSym);
             IPersistentMap wordMeta = null;
             String docString = null;
             if (this.l.get(1) instanceof IPersistentMap) {

@@ -19,6 +19,7 @@
        :author "Stephen C. Gilardi and Rich Hickey"}
   gershwin.main
   (:refer-clojure :exclude [with-bindings])
+  (:require [gershwin.rt :as rt])
   (:import (clojure.lang Compiler Compiler$CompilerException
                          LineNumberingPushbackReader RT)))
 
@@ -110,10 +111,24 @@
              *e nil]
      ~@body))
 
+(def first-prompt (atom true))
 (defn repl-prompt
   "Default :prompt hook for repl"
   []
-  (printf "%s=> " (ns-name *ns*)))
+  (let [prompt (fn [] (printf "%s> " (ns-name *ns*)))]
+    (if @first-prompt
+      (do
+        (reset! first-prompt false)
+        (prompt))
+      (do
+        (print "\n--- Data Stack:\n")
+        (doseq [item (gershwin.lang.Stack/seq)]
+          (if (instance? clojure.lang.LazySeq item)
+            (println "(...LazySeq...)")
+            (do
+              (gershwin.lang.RT/print item *out*)
+              (println))))
+        (prompt)))))
 
 (defn skip-if-eol
   "If the next character on stream s is a newline, skips it, otherwise
@@ -161,7 +176,7 @@
   [request-prompt request-exit]
   (or ({:line-start request-prompt :stream-end request-exit}
        (skip-whitespace *in*))
-      (let [input (read)]
+      (let [input (rt/gershwin-read)]
         (skip-if-eol *in*)
         input)))
 
@@ -249,23 +264,33 @@ by default when a new command-line REPL is started."} repl-requires
               prompt      repl-prompt
               flush       flush
               read        repl-read
-              eval        eval
+              eval        rt/gershwin-eval
               print       prn
               caught      repl-caught}}
         (apply hash-map options)
         request-prompt (Object.)
         request-exit (Object.)
+        ;; Ctrl-D doesn't always work
+        check-exit #(or (= % :gershwin.core/exit)
+                        (= % :gershwin.core/quit))
         read-eval-print
         (fn []
           (try
+            ;; Load Gershwin core and RT utilities
+            (require '[gershwin.core :refer :all])
+            (require '[gershwin.rt :refer :all])
+            ;; Main REPL loop
             (let [read-eval *read-eval*
                   input (with-read-known (read request-prompt request-exit))]
-             (or (#{request-prompt request-exit} input)
+              (if (check-exit input)
+                (System/exit 0)
+                (or (#{request-prompt request-exit} input)
                  (let [value (binding [*read-eval* read-eval] (eval input))]
-                   (print value)
+                   ;; The data stack gets printed in the repl-prompt fn
+                   ;; (print value)
                    (set! *3 *2)
                    (set! *2 *1)
-                   (set! *1 value))))
+                   (set! *1 value)))))
            (catch Throwable e
              (caught e)
              (set! *e e))))]

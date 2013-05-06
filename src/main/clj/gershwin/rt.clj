@@ -162,6 +162,45 @@
 ;; END Copying
 ;;;;
 
+(let [properties (with-open [version-stream (.getResourceAsStream
+                                             (clojure.lang.RT/baseLoader)
+                                             "gershwin/version.properties")]
+                   (doto (new java.util.Properties)
+                     (.load version-stream)))
+      version-string (.getProperty properties "version")
+      [_ major minor incremental qualifier snapshot]
+      (re-matches
+       #"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9_]+))?(?:-(SNAPSHOT))?"
+       version-string)
+      gershwin-version {:major       (Integer/valueOf ^String major)
+                        :minor       (Integer/valueOf ^String minor)
+                        :incremental (Integer/valueOf ^String incremental)
+                        :qualifier   (if (= qualifier "SNAPSHOT") nil qualifier)}]
+  (def ^{:dynamic true
+         :doc "The version info for Gershwin core, as a map containing :major :minor
+:incremental and :qualifier keys. Feature releases may increment
+:minor and/or :major, bugfix releases will increment :incremental.
+Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""}
+    *gershwin-version*
+    (if (.contains version-string "SNAPSHOT")
+      (clojure.lang.RT/assoc gershwin-version :interim true)
+      gershwin-version)))
+
+(defn
+  gershwin-version
+  "Returns Gershwin version as a printable string."
+  {:added "1.0"}
+  []
+  (str (:major *gershwin-version*)
+       "."
+       (:minor *gershwin-version*)
+       (when-let [i (:incremental *gershwin-version*)]
+         (str "." i))
+       (when-let [q (:qualifier *gershwin-version*)]
+         (when (pos? (count q)) (str "-" q)))
+       (when (:interim *gershwin-version*)
+         "-SNAPSHOT")))
+
 (defn gershwin-read
   "Reads the next object from stream, which must be an instance of
   java.io.PushbackReader or some derivee.  stream defaults to the

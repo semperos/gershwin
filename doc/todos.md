@@ -6,6 +6,8 @@
 
 ## Features ##
 
+ * The todo below this one is symptomatic of an incomplete implementation of "emit" for all cases in the Gershwin compiler. Just like compileDefinition and emitDefinition handle things differently for Words and Clojure Word functions, the same needs to happen to those forms when encountered outside of word definitions, i.e. when used at the top-level of a file.
+ * Need to document limitations of namespaces that use :gen-class, i.e. they need to be pure Clojure + the -main word definition. No Gershwin-style loading/requiring allowed, and all Gershwin should already be compiled.
  * Unit tests need a "parsing word" that can take in a quotation, execute it, and return what it would put on the stack in a collection. This can be accomplished by a word savvy enough to put something of its own (unique) on the stack, then execute a quotation, then take things off the stack until the special item is reached.
  * Reuse clojure.main `repl` fn, supplying the necessary read/eval/print functions to use Gershwin
  * Build orchestration to ensure all Gershwin code has been compiled to Clojure

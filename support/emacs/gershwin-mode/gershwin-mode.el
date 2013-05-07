@@ -63,6 +63,9 @@
                                (escape-chars x))
                              gershwin-builtins)))))
 
+  (set (make-local-variable 'comment-start) "!")
+  (set (make-local-variable 'comment-end) "")
+
   (add-hook 'gershwin-mode-hook (lambda () (local-set-key (kbd "C-c a") 'paredit-wrap-angled)))
   (add-hook 'gershwin-mode-hook (lambda ()
                                   (modify-syntax-entry ?< "(>" )

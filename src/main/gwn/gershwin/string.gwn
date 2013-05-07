@@ -1,5 +1,5 @@
 (ns gershwin.string
-  (:refer-clojure :exclude (replace reverse))
+  (:refer-clojure :exclude [replace reverse])
   (:require [gershwin.rt :refer :all]
             [clojure.string :as str])
   (:import (java.util.regex Pattern Matcher)

@@ -43,13 +43,13 @@
 
 : clear [] (stack-void (stack-clear)) ;
 
-: pr [n --] (stack-void (ap pr*)) ;
+: pr [n --] (stack-void (ap pr)) ;
 
-: prn [n --] (stack-void (ap prn*)) ;
+: prn [n --] (stack-void (ap prn)) ;
 
-: print [n --] (stack-void (ap print*)) ;
+: print [n --] (stack-void (ap print)) ;
 
-: println [n --] (stack-void (ap println*)) ;
+: println [n --] (stack-void (ap println)) ;
 
 : meta {:added "initial" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
   [x -- y]

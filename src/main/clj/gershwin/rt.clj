@@ -32,27 +32,6 @@
   (-> s name gershwin.lang.RT/formatGershwinName
       symbol resolve))
 
-(defn print*
-  [msg]
-  (print msg)
-  (.flush *out*))
-
-(defn println*
-  [msg]
-  (println msg)
-  (.flush *out*))
-
-(defn pr*
-  "@todo Even though clojure.lang.RT seems to print out readable forms, Clojure does all the work of pr/prn in core_print.clj, so this function (pr*) should be changed to handle the couple of Gershwin cases here and then defer to Clojure's pr function, instead of this current implementation which uses Gershwin's RT/print which defers to Clojure's RT/print."
-  [x]
-  (gershwin.lang.RT/print x *out*))
-
-(defn prn*
-  [x]
-  (gershwin.lang.RT/print x *out*)
-  (.write *out* "\n")
-  (.flush *out*))
-
 (defn st-peek [] (Stack/peek))
 
 (defn peek* [coll]

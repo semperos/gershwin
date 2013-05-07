@@ -282,9 +282,13 @@ public class Compiler {
         }
 
         public boolean isWord() {
-            if(this.x instanceof IMeta) {
+            if(this.x != null && this.x instanceof IMeta) {
                 IPersistentMap meta = clojure.lang.RT.meta(this.x);
-                return clojure.lang.RT.booleanCast(meta.valAt(WORD_KW));
+                if(meta != null) {
+                    return clojure.lang.RT.booleanCast(meta.valAt(WORD_KW));
+                } else {
+                    return false;
+                }
             }
             return false;
         }

@@ -104,9 +104,15 @@ public class Compiler {
             if(rawForm instanceof Symbol) {
                 Expr expr = analyzeSymbol((Symbol) rawForm);
                 if(expr instanceof WordExpr) {
-                    Word word = ((WordExpr) expr).getWord();
+                    // A WordExpr means the rawForm is a Symbol that points to
+                    // a Clojure Var resolves to a Gershwin word.
+                    // @todo If this implementation proves preferable, change
+                    //   how analyzeSymbol works to return a VarExpr
+                    Var var = (Var) maybeSymbolIsWord(rawForm);
+                    // Word word = ((WordExpr) expr).getWord();
                     // Clojure turtles all the way down.
-                    definitionForms = conj(definitionForms, withInvoke(word.getDefinitionForm()));
+                    // @todo Compare with code that just wraps this in a list to invoke
+                    definitionForms = conj(definitionForms, withInvoke(var));
                 } else if(expr instanceof ClojureExpr) {
                     ClojureExpr clojureExpr = (ClojureExpr) expr;
                     if(clojureExpr.isWord()) {
@@ -398,6 +404,15 @@ public class Compiler {
             return word;
         }
 
+        /**
+         * Emit a word definition.
+         *
+         * @todo Consider outputting code that instantiates an
+         *   an actual {@link Word} object and passes in the things it needs,
+         *   will likely need it when adding, for example, stack effect analysis
+         *   and would help distinguish the output from a random collection of
+         *   Clojure functions.
+         */
         public String emit() {
             Symbol nameSym = (Symbol) this.l.get(0);
             Symbol gershwinName = gershwinSymbol(nameSym);
@@ -625,10 +640,7 @@ public class Compiler {
 
     public static Expr analyzeSymbol(Symbol form) {
         IParser p;
-        String maybeVarName = form.toString() + GERSHWIN_VAR_SUFFIX;
-        Namespace currentClojureNs = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
-        // Consider whether suffix should be conditionally appended
-        Object maybeVar = clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(maybeVarName));
+        Object maybeVar = maybeSymbolIsWord(form);
         if(maybeVar != null && maybeVar instanceof Var) {
             Var aVar = (Var) maybeVar;
             if(aVar.isBound()) {
@@ -658,6 +670,13 @@ public class Compiler {
 
     public static Expr analyzeClojure(Object form) {
         return new ClojureExpr(form);
+    }
+
+    public static Object maybeSymbolIsWord(Object form) {
+        String maybeVarName = form.toString() + GERSHWIN_VAR_SUFFIX;
+        Namespace currentClojureNs = (Namespace) clojure.lang.RT.CURRENT_NS.deref();
+        // Consider whether suffix should be conditionally appended
+        return clojure.lang.Compiler.maybeResolveIn(currentClojureNs, Symbol.intern(maybeVarName));
     }
 
     // Try loading: (Compiler/load (java.io.StringReader. \"(fn [] (+ (Stack/popIt) (Stack/popIt)))\"))

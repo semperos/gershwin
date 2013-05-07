@@ -218,19 +218,23 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   lib)
 
 (defn gershwin-require
-  "For now, this support requiring a single lib at a time. "
-  [spec]
-  (if (coll? spec)
-    (let [suffix gershwin.lang.RT/GERSHWIN_SUFFIX
-          lib (first spec)
-          kw (-> spec next first)
-          words (let [ws (-> spec next next first)]
-                  (when (coll? ws) ;; e.g., :all
-                    (map #(symbol (str % suffix)) ws)))]
-      (gershwin-compile lib)
-      (if words
-        (require [lib kw words])
-        (require spec)))
-    (do
-      (gershwin-compile spec)
-      (require spec))))
+  "For now, this support requiring a single lib at a time. The optional recompile? argument indicates whether or not the Gershwin source should be (re)compiled to Clojure before attempting a proper `require` of the namespace.
+
+   @todo This works in the REPL, but not in compiled output."
+  ([spec] (gershwin-require spec false))
+  ([spec recompile?]
+     (if (coll? spec)
+       (let [suffix gershwin.lang.RT/GERSHWIN_SUFFIX
+             lib (first spec)
+             kw (-> spec next first)
+             words (let [ws (-> spec next next first)]
+                     (when (coll? ws) ;; e.g., :all
+                       (map #(symbol (str % suffix)) ws)))]
+         (when recompile?
+           (gershwin-compile lib))
+         (if words
+           (require [lib kw words])
+           (require spec)))
+       (do
+         (gershwin-compile spec)
+         (require spec)))))

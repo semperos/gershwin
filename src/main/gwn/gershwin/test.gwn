@@ -36,11 +36,3 @@
   start-suite
   swap invoke
   suite-passes? ;
-
-!! : run-suite
-!!   "Load a test namespace, then run its run word and gather results."
-!!   [sym -- ?]
-!!   dup gershwin-require
-!!   start-suite
-!!   < (resolve (symbol (str (pop-it) ":run"))) > dip nip
-!!   suite-passes? ;

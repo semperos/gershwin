@@ -66,6 +66,7 @@ public class Compiler {
                 if(expr instanceof WordExpr) {
                     Word word = ((WordExpr) expr).getWord();
                     // Clojure turtles all the way down.
+                    // @todo Consider using withInvoke instead, for clarity
                     definitionForms = conj(definitionForms, clojure.lang.RT.list(word.getDefinitionFn()));
                 } else if(expr instanceof ClojureExpr) {
                     ClojureExpr clojureExpr = (ClojureExpr) expr;

@@ -6,10 +6,17 @@
 
 : load [s --] (stack-void (ap gershwin-load)) ;
 
-: require "Compile and load a Gershwin namespace"
+: compile [s --] (stack-void (ap gershwin-compile)) ;
+
+: require "Require a Gershwin namespace"
   [arg --]
-  ! @todo Determine why a nil is put on stack
   (stack-void (ap gershwin-require)) ;
+
+: reload "Reload (compile & require) a namespace"
+  [arg --]
+  (stack-void (ap #(gershwin-require % true))) ;
+
+: in-ns [s --] (stack-void (ap in-ns)) ;
 
 !! ## Invokables ##
 

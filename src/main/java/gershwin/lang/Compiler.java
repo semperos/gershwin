@@ -3,6 +3,7 @@ package gershwin.lang;
 import clojure.lang.Fn;
 import clojure.lang.IFn;
 import clojure.lang.IMapEntry;
+import clojure.lang.IMeta;
 import clojure.lang.IObj;
 import clojure.lang.IPersistentCollection;
 import clojure.lang.IPersistentList;
@@ -66,6 +67,14 @@ public class Compiler {
                     Word word = ((WordExpr) expr).getWord();
                     // Clojure turtles all the way down.
                     definitionForms = conj(definitionForms, clojure.lang.RT.list(word.getDefinitionFn()));
+                } else if(expr instanceof ClojureExpr) {
+                    ClojureExpr clojureExpr = (ClojureExpr) expr;
+                    if(clojureExpr.isWord()) {
+                        definitionForms = conj(definitionForms, clojureExpr.val());
+                    } else {
+                        ISeq form = withConjIt(rawForm);
+                        definitionForms = conj(definitionForms, form);
+                    }
                 } else {
                     ISeq form = withConjIt(rawForm);
                     definitionForms = conj(definitionForms, form);
@@ -94,6 +103,14 @@ public class Compiler {
                     Word word = ((WordExpr) expr).getWord();
                     // Clojure turtles all the way down.
                     definitionForms = conj(definitionForms, word.getDefinitionForm());
+                } else if(expr instanceof ClojureExpr) {
+                    ClojureExpr clojureExpr = (ClojureExpr) expr;
+                    if(clojureExpr.isWord()) {
+                        definitionForms = conj(definitionForms, withInvoke(clojureExpr.val()));
+                    } else {
+                        ISeq form = withConjIt(rawForm);
+                        definitionForms = conj(definitionForms, form);
+                    }
                 } else {
                     ISeq form = withConjIt(rawForm);
                     definitionForms = conj(definitionForms, form);
@@ -205,6 +222,10 @@ public class Compiler {
                                     RT.STACK_VOID);
     }
 
+    private static ISeq withInvoke(Object rawForm) {
+        return clojure.lang.RT.list(Symbol.intern(".invoke"), rawForm);
+    }
+
     /**
      * Instead of having separate top-level {@code analyzeFoo}
      * methods for every possible language form,
@@ -246,8 +267,16 @@ public class Compiler {
         /**
          * Mimicking Clojure's literal exprs
          */
-	Object val() {
+	public Object val() {
             return x;
+        }
+
+        public boolean isWord() {
+            if(this.x instanceof IMeta) {
+                IPersistentMap meta = clojure.lang.RT.meta(this.x);
+                return clojure.lang.RT.booleanCast(meta.valAt(WORD_KW));
+            }
+            return false;
         }
 
 	public Object eval() {
@@ -274,8 +303,7 @@ public class Compiler {
                 Var aVar = (Var) clojureForm;
                 IPersistentMap metadata = aVar.meta();
                 if(metadata.containsKey(WORD_KW)) {
-                    IMapEntry entry = metadata.entryAt(WORD_KW);
-                    if(clojure.lang.RT.booleanCast(entry.getValue())) {
+                    if(clojure.lang.RT.booleanCast(metadata.valAt(WORD_KW))) {
                         // This is a word fn, invoke it immediately
                         invoked = true;
                         IFn fn = (IFn) aVar.deref();

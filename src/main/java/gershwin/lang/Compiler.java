@@ -102,7 +102,7 @@ public class Compiler {
                 if(expr instanceof WordExpr) {
                     Word word = ((WordExpr) expr).getWord();
                     // Clojure turtles all the way down.
-                    definitionForms = conj(definitionForms, word.getDefinitionForm());
+                    definitionForms = conj(definitionForms, withInvoke(word.getDefinitionForm()));
                 } else if(expr instanceof ClojureExpr) {
                     ClojureExpr clojureExpr = (ClojureExpr) expr;
                     if(clojureExpr.isWord()) {
@@ -222,6 +222,12 @@ public class Compiler {
                                     RT.STACK_VOID);
     }
 
+    /**
+     * For Clojure functions, this is the same as wrapping the form
+     * with clojure.lang.RT.list. That said, it depends on implementation
+     * detail that IFn exposes an invoke() method, but it's also clearer
+     * in this code what the intent is.
+     */
     private static ISeq withInvoke(Object rawForm) {
         return clojure.lang.RT.list(Symbol.intern(".invoke"), rawForm);
     }

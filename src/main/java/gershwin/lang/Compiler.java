@@ -56,6 +56,9 @@ public class Compiler {
 
     /**
      * Simple compilation to a Clojure function.
+     *
+     * @todo Consider whether inlining or simply referencing
+     *   Clojure var's and invoking them as needed would be better.
      */
     public static Object compileDefinition(List rawForms) {
         IPersistentCollection definitionForms = PersistentVector.EMPTY;

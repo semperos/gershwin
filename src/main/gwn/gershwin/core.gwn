@@ -90,20 +90,6 @@
   [x -- y]
   (ap gershwin-var) ;
 
-: if
-  [? then else]
-  (let [else-quot (pop-it)
-        then-quot (pop-it)
-        condition (pop-it)]
-    (if condition
-      (stack-void (.invoke then-quot))
-      (stack-void (.invoke else-quot)))) ;
-
-: when
-  "'if' with no 'else' branch"
-  [? then -- ...]
-  < > if ;
-
 !! ## Shuffle words ##
 
 !! Basics are: drop, swap, dup, rot
@@ -280,6 +266,28 @@
 !! NOTE: The `spread` word requires words we haven't implemented yet. Punting til later.
 
 !! Booleans
+
+: if
+  [? then else -- ...]
+  (let [else-quot (pop-it)
+        then-quot (pop-it)
+        condition (pop-it)]
+    (if condition
+      (stack-void (.invoke then-quot))
+      (stack-void (.invoke else-quot)))) ;
+
+: if-not
+  [? then else -- ...]
+  swap if ;
+
+: when
+  "'if' with no 'else' branch"
+  [? then -- ...]
+  < > if ;
+
+: when-not
+  [? then -- ...]
+  < > if-not ;
 
 : ? "Choose between t or f depending on truthiness of ?"
   [? t f]

@@ -68,6 +68,9 @@ public class RT {
 	load(scriptbase, true);
     }
 
+    /**
+     * Make sure reloading/recompiling can be triggered from Gershwin code.
+     */
     static public void load(String scriptbase, boolean failIfNotFound) throws IOException, ClassNotFoundException {
 	String classfile = scriptbase + clojure.lang.RT.LOADER_SUFFIX + ".class";
 	// String cljfile = scriptbase + ".clj";

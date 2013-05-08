@@ -391,7 +391,7 @@
 
 : has-items "Same as has-item, but expects a collection of items to check for instead of a single one."
   [coll coll -- item-or-nil]
-  set apply clojure.core/some apply2 ;
+  clojure.core/set apply clojure.core/some apply2 ;
 
 : has-item "For everyone who thinks (some #{:foo} coll) is a rare departure from Clojure's otherwise pragmatic nature. Behaves like (some #{:foo} coll), returning the item being asked about if present or nil otherwise."
   [coll item -- item-or-nil]

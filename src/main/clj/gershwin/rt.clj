@@ -55,16 +55,9 @@
   [x] (Stack/conjMutable x))
 
 (defn ap
-  "Apply the function to TOS"
-  [a-fn] (a-fn (pop-it)))
-
-(defn ap2
-  "Apply the function to the top two items on TOS"
-  [a-fn] (a-fn (pop-it) (pop-it)))
-
-(defn ap3
-  "Apply the function to the top three items on TOS"
-  [a-fn] (a-fn (pop-it) (pop-it) (pop-it)))
+  "Apply the function to n number of items off TOS. Defaults to top item."
+  ([a-fn] (ap 1 a-fn))
+  ([n a-fn] (apply a-fn (for [_ (range n)] (pop-it)))))
 
 (defn pop-n-swap
   "Remove top two items from TOS, swap, then apply the function."

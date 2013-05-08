@@ -74,7 +74,7 @@ public class Compiler {
                 } else if(expr instanceof ClojureExpr) {
                     ClojureExpr clojureExpr = (ClojureExpr) expr;
                     if(clojureExpr.isWord()) {
-                        definitionForms = conj(definitionForms, clojureExpr.val());
+                        definitionForms = conj(definitionForms, withInvoke(clojureExpr.val()));
                     } else {
                         ISeq form = withConjIt(rawForm);
                         definitionForms = conj(definitionForms, form);
@@ -467,19 +467,24 @@ public class Compiler {
             this.l = l;
             // What we're going to store as the word's definition
             Object fnForm = compileDefinition(l);
+            System.out.println("Formed Quot Def: " + fnForm);
             IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
+            System.out.println("Clojure Compiled Quot Def: " + definition);
             Object defForm = emitDefinition(l);
+            System.out.println("Def Form: " + defForm);
             this.quot = new Quotation(definition, defForm);
             // Used for print output
             this.quot.setQuotationForms(l);
         }
 
         public Object eval() {
+            System.out.println("Eval Quot Expr");
             Stack.conjIt(quot);
             return quot;
         }
 
         public String emit() {
+            System.out.println("Emit Quot Expr: " + this.quot.getDefinitionForm());
             return this.quot.getDefinitionForm().toString();
         }
     }

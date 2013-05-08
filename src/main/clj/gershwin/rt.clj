@@ -191,11 +191,11 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
   For data structure interop use clojure.edn/read"
   {:static true}
   ([]
-   (read *in*))
+   (gershwin-read *in*))
   ([stream]
-   (read stream true nil))
+   (gershwin-read stream true nil))
   ([stream eof-error? eof-value]
-   (read stream eof-error? eof-value false))
+   (gershwin-read stream eof-error? eof-value false))
   ([stream eof-error? eof-value recursive?]
    (. gershwin.lang.Parser (read stream (boolean eof-error?) eof-value recursive?))))
 

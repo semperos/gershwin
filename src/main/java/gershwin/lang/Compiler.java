@@ -216,6 +216,10 @@ public class Compiler {
         }
     }
 
+    private static ISeq withStackVoid(Object rawForm) {
+        return clojure.lang.RT.list(DO, rawForm, RT.STACK_VOID);
+    }
+
     /**
      * "Compile" a non-Word form by wrapping it in a call to
      * Stack.conjIt, so the return value of the given expression
@@ -224,12 +228,10 @@ public class Compiler {
      * to the stack.
      */
     private static ISeq withConjIt(Object rawForm) {
-        return clojure.lang.RT.list(DO,
-                                    cons(DOT,
-                                         cons(Symbol.intern("gershwin.lang.Stack"),
-                                              cons(clojure.lang.RT.list(Symbol.intern("conjIt"), rawForm),
-                                                   null))),
-                                    RT.STACK_VOID);
+        return withStackVoid(cons(DOT,
+                                  cons(Symbol.intern("gershwin.lang.Stack"),
+                                       cons(clojure.lang.RT.list(Symbol.intern("conjIt"), rawForm),
+                                            null))));
     }
 
     /**
@@ -433,7 +435,7 @@ public class Compiler {
             // What we're going to store as the word's definition.
             Object fnForm = emitDefinition(rawForms);
             // @todo Attach metadata
-            Object varForm = clojure.lang.RT.list(DEF, Symbol.intern("^:word"), gershwinName, fnForm);
+            Object varForm = withStackVoid(clojure.lang.RT.list(DEF, Symbol.intern("^:word"), gershwinName, fnForm));
             return varForm.toString();
             // IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
             // Word word = new Word(stackEffect, definition);

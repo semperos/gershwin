@@ -359,6 +359,8 @@
 
 !! Collections
 
+!! Major cheating for now; use Clojure directly.
+
 : assoc [coll k v -- coll] (pop-n-swap2 assoc) ;
 
 : conj [coll x -- coll] (pop-n-swap conj) ;
@@ -366,6 +368,54 @@
 : cons [x coll -- coll] (pop-n-swap cons) ;
 
 : dissoc [coll k -- coll] (pop-n-swap dissoc) ;
+
+: map "Invoke the quotation for each element in the collection, putting the new collection of these results on TOS."
+  [coll quot -- coll]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (lazy-seq
+     (loop [coll coll final []]
+       (if (seq coll)
+         (do
+           (conj-it (first coll))
+           (.invoke quot)
+           (recur (rest coll) (conj final (pop-it))))
+         final)))) ;
+
+
+: filter "Replace the collection with one including only those items that return truthy for the given predicate quotation."
+  [coll pred-quot -- coll]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (lazy-seq
+     (loop [coll coll final []]
+       (if (seq coll)
+         (do
+           (conj-it (first coll))
+           (.invoke quot)
+           (if (pop-it)
+             (recur (rest coll) (conj final (first coll)))
+             (recur (rest coll) final)))
+         final)))) ;
+
+: remove "Opposite of filter. Replace collection with one including only those items that return falsey for the given predicate."
+  [coll pred-quot -- coll]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (lazy-seq
+     (loop [coll coll final []]
+       (if (seq coll)
+         (do
+           (conj-it (first coll))
+           (.invoke quot)
+           (if-not (pop-it)
+             (recur (rest coll) (conj final (first coll)))
+             (recur (rest coll) final)))
+         final)))) ;
+
+: take "Put a lazy collection on TOS that consists of the first n items from the original collection."
+  [coll n -- coll]
+  (ap2 take) ;
 
 !! Interactive development niceties
 

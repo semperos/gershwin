@@ -335,7 +335,7 @@ by default when a new command-line REPL is started."} repl-requires
         reader (LineNumberingPushbackReader. (java.io.StringReader. str))]
       (loop [input (with-read-known (read reader false eof))]
         (when-not (= input eof)
-          (let [value (eval input)]
+          (let [value (rt/gershwin-eval input)]
             (when-not (nil? value)
               (prn value))
             (recur (with-read-known (read reader false eof))))))))

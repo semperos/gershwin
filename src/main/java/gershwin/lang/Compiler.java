@@ -520,7 +520,7 @@ public class Compiler {
         }
 
         public String emit() {
-            return this.quot.getDefinitionForm().toString();
+            return withConjIt(this.quot.getDefinitionForm()).toString();
         }
     }
 

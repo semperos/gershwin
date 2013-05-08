@@ -468,6 +468,21 @@ If the collection is empty, returns nil. If the collection contains only one ite
   [coll n -- coll]
   (ap 2 take) ;
 
+!! @todo Try with (some #{:foo} coll) idiom
+: some "Puts the first truthy value generated from invoking the given quotation for each item in the collection, else puts nil on TOS."
+  [coll quot]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (loop [coll coll]
+      (if (seq coll)
+        (do
+          (conj-it (first coll))
+          (.invoke quot)
+          (if (pop-it)
+            (first coll)
+            (recur (rest coll))))
+        nil))) ;
+
 !! String & Regular Expressions
 
 : str "Stringify the given item on TOS."

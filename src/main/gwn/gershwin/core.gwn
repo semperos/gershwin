@@ -371,6 +371,28 @@
 
 : dissoc [coll k -- coll] (pop-n-swap dissoc) ;
 
+: contains?
+  [coll item -- ?]
+  (pop-n-swap contains?) ;
+
+: some "Puts the first truthy value generated from invoking the given quotation for each item in the collection, else puts nil on TOS."
+  [coll quot]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (loop [coll coll]
+      (if (seq coll)
+        (do
+          (conj-it (first coll))
+          (.invoke quot)
+          (if (pop-it)
+            (first coll)
+            (recur (rest coll))))
+        nil))) ;
+
+: has-item "For everyone who thinks (some #{:foo} coll) is a rare departure from Clojure's otherwise pragmatic nature. Behaves like (some #{:foo} coll), returning the item being asked about if present or nil otherwise."
+  [coll item -- item-or-nil]
+  [] swap conj set apply clojure.core/some apply2 ;
+
 : map "Invoke the quotation for each element in the collection, putting the new collection of these results on TOS."
   [coll quot -- coll]
   (let [quot (pop-it)
@@ -467,21 +489,6 @@ If the collection is empty, returns nil. If the collection contains only one ite
 : take "Put a lazy collection on TOS that consists of the first n items from the original collection."
   [coll n -- coll]
   (ap 2 take) ;
-
-!! @todo Try with (some #{:foo} coll) idiom
-: some "Puts the first truthy value generated from invoking the given quotation for each item in the collection, else puts nil on TOS."
-  [coll quot]
-  (let [quot (pop-it)
-        coll (pop-it)]
-    (loop [coll coll]
-      (if (seq coll)
-        (do
-          (conj-it (first coll))
-          (.invoke quot)
-          (if (pop-it)
-            (first coll)
-            (recur (rest coll))))
-        nil))) ;
 
 !! String & Regular Expressions
 

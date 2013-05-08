@@ -8,6 +8,7 @@
 
  * Store Stack in a Var
  * Make Gershwin 'require' word catch exception that a proper Clojure or class file was not found and then force an on-the-fly compilation. This is supposed to be captured in RT.load, so investigate that as well.
+ * Since Clojure's `map` can work on multiple collections, provide at least equivalent `map2` and `map3` Gershwin words
  * Consider accepting either ';' or ';;' to terminate word definitions
  * Unit tests need a "parsing word" that can take in a quotation, execute it, and return what it would put on the stack in a collection. This can be accomplished by a word savvy enough to put something of its own (unique) on the stack, then execute a quotation, then take things off the stack until the special item is reached.
  * Reuse clojure.main `repl` fn, supplying the necessary read/eval/print functions to use Gershwin

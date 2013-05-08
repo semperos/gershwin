@@ -339,7 +339,47 @@ public class Compiler {
 	}
 
         public String emit() {
-            return this.x.toString();
+            Object form = null;
+            Object rawForm = val();
+            // Handle the ns macro as a special case, to avoid having
+            // to clear the stack when requiring in namespaces.
+            if(rawForm instanceof IPersistentList) {
+                IPersistentList forms = (IPersistentList) rawForm;
+                Object fst = clojure.lang.RT.first(forms);
+                if(fst instanceof Symbol && fst.equals(NS)) {
+                    // Wrap this in a do form and return :gershwin.core/stack-void
+                    // to avoid putting anything on the stack.
+                    form = clojure.lang.RT.list(DO, forms, RT.STACK_VOID);
+                }
+            }
+            if(form == null)
+                form = rawForm;
+            // Hmmm
+            // Object clojureForm = clojure.lang.Compiler.eval(form, false);
+            Object clojureForm = form;
+            // Handle functions with ^:word metadata, which are Gershwin words
+            // and should be wrapped so that they get invoked.
+            Object finalForm = null;
+            // @todo NOTE TO SELF: Consider whether quotation fn's fall into this
+            //   category and whether or not they need to be auto-invoked here.
+            if(clojureForm instanceof Var) {
+                Var aVar = (Var) clojureForm;
+                IPersistentMap metadata = aVar.meta();
+                if(metadata.containsKey(WORD_KW)) {
+                    if(clojure.lang.RT.booleanCast(metadata.valAt(WORD_KW))) {
+                        // This is a word fn, invoke it immediately
+                        finalForm = withInvoke(clojureForm);
+                        // IFn fn = (IFn) aVar.deref();
+                        // fn.invoke();
+                    }
+                }
+            } // else if(clojureForm instanceof IPersistentList) {
+            //     // Leave Clojure well enough alone
+            //     finalForm = clojureForm;
+            // }
+            if(finalForm == null)
+                finalForm = withConjIt(clojureForm);
+            return finalForm.toString();
         }
     }
 
@@ -480,6 +520,7 @@ public class Compiler {
         }
 
         public String emit() {
+            System.out.println("QUOTATION EMIT: " + this.quot + ", " + this.quot.getDefinitionForm());
             return this.quot.getDefinitionForm().toString();
         }
     }

@@ -32,11 +32,11 @@
 
 : invoke-apply2 "Same as invoke-apply, but apply the invocable to top two items on TOS."
   [x y invocable -- ...]
-  (ap2 (pop-it)) ;
+  (ap 2 (pop-it)) ;
 
 : invoke-apply3 "Same as invoke-apply, but apply the invocable to top three items on TOS."
   [x y z invocable -- ...]
-  (ap3 (pop-it)) ;
+  (ap 3 (pop-it)) ;
 
 : invoke-swap "Invoke the IInvocable, apply it to the top two items on TOS after swapping them."
   [x y invocable -- ...]
@@ -333,11 +333,11 @@
 
 !! Basic math
 
-: + [n n -- n] (ap2 +) ;
+: + [n n -- n] (ap 2 +) ;
 
 : - [n n -- n] (pop-n-swap -) ;
 
-: * [n n -- n] (ap2 *) ;
+: * [n n -- n] (ap 2 *) ;
 
 : lt [n n -- ?] (pop-n-swap <) ;
 
@@ -355,7 +355,7 @@
 
 !! Equality
 
-: = [n -- ?] (ap2 =) ;
+: = [n -- ?] (ap 2 =) ;
 
 !! Collections
 
@@ -466,7 +466,25 @@ If the collection is empty, returns nil. If the collection contains only one ite
 
 : take "Put a lazy collection on TOS that consists of the first n items from the original collection."
   [coll n -- coll]
-  (ap2 take) ;
+  (ap 2 take) ;
+
+!! String & Regular Expressions
+
+: str "Stringify the given item on TOS."
+  [x -- s]
+  (ap str) ;
+
+: str2 "Concatenate the top two items as strings."
+  [s s -- s]
+  (pop-n-swap str) ;
+
+: str3 "Concatenate the top three items as strings."
+  [s s s -- s]
+  (pop-n-swap2 str) ;
+
+: re-pattern "Given a String, put a java.util.Pattern object on TOS. Note that you need to double-escape things per Java's Pattern requirements."
+  [s -- r]
+  (ap re-pattern) ;
 
 !! Interactive development niceties
 

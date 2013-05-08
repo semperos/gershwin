@@ -363,6 +363,8 @@
 
 : assoc [coll k v -- coll] (pop-n-swap2 assoc) ;
 
+!! @todo update-in
+
 : conj [coll x -- coll] (pop-n-swap conj) ;
 
 : cons [x coll -- coll] (pop-n-swap cons) ;
@@ -381,6 +383,55 @@
            (.invoke quot)
            (recur (rest coll) (conj final (pop-it))))
          final)))) ;
+
+: reduce "Given a collection and a quotation that expects two items off the stack, calls the quotation with the first two items of the collection, followed by invoking the quotation using that result and subsequent items from the collection.
+
+If the collection is empty, returns nil. If the collection contains only one item, that item is put on TOS and the quotation is not invoked."
+  [coll quot -- coll]
+  (let [quot (pop-it)
+        coll (pop-it)]
+    (cond
+     (empty? coll) nil
+
+     (= (count coll) 1) (first coll)
+
+     :else
+     (do (conj-it (first coll))
+         (conj-it (second coll))
+         (.invoke quot)
+         (if (gt (count coll) 2)
+           (loop [coll (rest (rest coll))]
+             (if (seq coll)
+               (do
+                 (conj-it (first coll))
+                 (.invoke quot)
+                 (recur (rest coll)))
+               ::stack-void))
+           ::stack-void)))) ;
+
+: reduce-with "Like reduce, but begins the reduction by invoking the quotation using the specified \"accumulator\" and the first item from the collection, instead of the first two items from the collection like `reduce` does."
+  [coll acc quot -- coll]
+  (let [quot (pop-it)
+        acc  (pop-it)
+        coll (pop-it)]
+    (cond
+     (empty? coll) nil
+
+     (= (count coll) 1) (first coll)
+
+     :else
+     (do (conj-it acc)
+         (conj-it (first coll))
+         (.invoke quot)
+         (if (gt (count coll) 2)
+           (loop [coll (rest coll)]
+             (if (seq coll)
+               (do
+                 (conj-it (first coll))
+                 (.invoke quot)
+                 (recur (rest coll)))
+               ::stack-void))
+           ::stack-void)))) ;
 
 
 : filter "Replace the collection with one including only those items that return truthy for the given predicate quotation."

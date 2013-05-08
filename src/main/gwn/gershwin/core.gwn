@@ -20,31 +20,31 @@
 
 !! ## Invokables ##
 
+!! These are low-level constructs that should not normally be used.
+!! That said, when wrapping Clojure libraries for use in Gershwin,
+!! the apply words will be used often.
+
 : invoke "Invoke an IInvocable (quotations). The quotation itself puts things on the stack, so the result of the invocation itself is ignored."
   [quot -- ...]
   (stack-void (.invoke (pop-it))) ;
 
-: invoke-apply "Invoke the IInvocable, applying it to the next item on TOS as an argument. This and its higher-arity counterparts are not designed for quotations, since quotations do not take arguments, but instead to make idiomatic use of Clojure forms that implement IFn.
+: apply "Apply the item on TOS to the second item as an argument. This and its higher-arity counterparts are not designed for quotations, since quotations do not take arguments, but instead to make idiomatic use of Clojure forms that implement IFn.
 
-  Example: {:answer 42} :answer invoke-apply"
+  Example: {:answer 42} :answer apply"
   [x invocable -- ...]
   (ap (pop-it)) ;
 
-: invoke-apply2 "Same as invoke-apply, but apply the invocable to top two items on TOS."
+: apply2 "Same as apply, but apply the invocable to top two items on TOS."
   [x y invocable -- ...]
   (ap 2 (pop-it)) ;
 
-: invoke-apply3 "Same as invoke-apply, but apply the invocable to top three items on TOS."
+: apply3 "Same as apply, but apply the invocable to top three items on TOS."
   [x y z invocable -- ...]
   (ap 3 (pop-it)) ;
 
-: invoke-swap "Invoke the IInvocable, apply it to the top two items on TOS after swapping them."
+: apply-swap "Invoke the IInvocable, apply it to the top two items on TOS after swapping them."
   [x y invocable -- ...]
   (pop-n-swap (pop-it)) ;
-
-: invoke-kw "Alias for invoke-apply, for common use-case of using a keyword like a function."
-  [m kw --]
-  invoke-apply ;
 
 !! ## Utilities ##
 
@@ -491,4 +491,4 @@ If the collection is empty, returns nil. If the collection contains only one ite
 : print-doc "Print documentation metadata for a Gershwin word with the given name. Accepts either a symbol or a var."
   [n --]
   dup symbol? < var > < > if
-  meta :doc invoke-kw println ;
+  meta :doc apply println ;

@@ -37,10 +37,11 @@
     "bi" "bi2" "bi3" "tri" "tri2" "tri3" "bi*" "bi2*" "tri*" "tri2*" "boolean"
     "bi&" "bi2&" "tri&" "tri2&" "both?" "either?" "+" "-" "*" "div" "lt"
     "gt" "lt=" "gt=" "odd?" "even?" "=" "assoc" "conj" "cons" "dissoc" "print-doc"
-    "meta" "invoke" "invoke-apply" "invoke-apply2" "invoke-apply3" "invoke-swap" "invoke-kw"
+    "meta" "invoke" "apply" "apply2" "apply3" "apply-swap"
     "load" "require" "reload" "compile" "clear" "pr" "prn" "print" "println"
     "type" "class" "symbol" "symbol?"
-    "function?" "var" "gershwin-var" "if" "if-not" "when" "when-not" "?" "or" "and")
+    "function?" "var" "gershwin-var" "if" "if-not" "when" "when-not" "?" "or" "and"
+    "re-pattern" "str" "str2" "str3" "take" "map" "reduce" "filter" "remove" "in-ns")
   "Words built into the core of Gershwin")
 
 ;;;###autoload

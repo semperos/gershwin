@@ -339,13 +339,13 @@
 
 : * [n n -- n] (ap 2 *) ;
 
-: lt [n n -- ?] (pop-n-swap <) ;
+: lt [n n -- ?] (pop-n-swap lt) ;
 
-: gt [n n -- ?] (pop-n-swap >) ;
+: gt [n n -- ?] (pop-n-swap gt) ;
 
-: lt= [n n -- ?] (pop-n-swap <=) ;
+: lt= [n n -- ?] (pop-n-swap lt=) ;
 
-: gt= [n n -- ?] (pop-n-swap >=) ;
+: gt= [n n -- ?] (pop-n-swap gt=) ;
 
 : div [n n -- n] (pop-n-swap /) ;
 

@@ -2,6 +2,7 @@
   (:require [gershwin.core :refer :all]))
 
 '[gershwin.test :refer :all] require
+'[gershwin.string :as :str] require
 
 : suite [-- ?]
   !! Math
@@ -22,7 +23,11 @@
   !! Collections
   < {:lang "gershwin"} > < {:lang "clojure"} :lang "gershwin" assoc > unit-test
   < [1 2 3 4] > < [1 2 3] 4 conj > unit-test
-  < '(1 2 3 4) > < 1 '(2 3 4) cons > unit-test ;
+  < '(1 2 3 4) > < 1 '(2 3 4) cons > unit-test
+
+  !! Strings
+  < "football" > < "llabtoof" str/reverse > unit-test
+  < "fzz" > < "foo" "o" "z" str/replace > unit-test ;
 
   !! @todo Current impl only supports single value returns
   !! < 4 3 > < 3 4 swap > unit-test

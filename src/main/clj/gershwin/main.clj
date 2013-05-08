@@ -20,8 +20,9 @@
   gershwin.main
   (:refer-clojure :exclude [with-bindings])
   (:require [gershwin.rt :as rt])
-  (:import (clojure.lang Compiler Compiler$CompilerException
-                         LineNumberingPushbackReader RT)))
+  (:import [gershwin.lang LineNumberingPushbackReader]
+           [clojure.lang Compiler Compiler$CompilerException RT]
+           [java.io InputStreamReader]))
 
 (declare main)
 
@@ -256,63 +257,65 @@ by default when a new command-line REPL is started."} repl-requires
   [& options]
   (let [cl (.getContextClassLoader (Thread/currentThread))]
     (.setContextClassLoader (Thread/currentThread) (clojure.lang.DynamicClassLoader. cl)))
-  (let [{:keys [init need-prompt prompt flush read eval print caught]
-         :or {init        #()
-              need-prompt (if (instance? LineNumberingPushbackReader *in*)
-                            #(.atLineStart ^LineNumberingPushbackReader *in*)
-                            #(identity true))
-              prompt      repl-prompt
-              flush       flush
-              read        repl-read
-              eval        rt/gershwin-eval
-              print       prn
-              caught      repl-caught}}
-        (apply hash-map options)
-        request-prompt (Object.)
-        request-exit (Object.)
-        ;; Ctrl-D doesn't always work
-        check-exit #(or (= % :gershwin.core/exit)
-                        (= % :gershwin.core/quit))
-        read-eval-print
-        (fn []
-          (try
-            ;; Load Gershwin core and RT utilities
-            (require '[gershwin.core :refer :all])
-            (require '[gershwin.rt :refer :all])
-            ;; Main REPL loop
-            (let [read-eval *read-eval*
-                  input (with-read-known (read request-prompt request-exit))]
-              (if (check-exit input)
-                (System/exit 0)
-                (or (#{request-prompt request-exit} input)
-                 (let [value (binding [*read-eval* read-eval] (eval input))]
-                   ;; The data stack gets printed in the repl-prompt fn
-                   ;; (print value)
-                   (set! *3 *2)
-                   (set! *2 *1)
-                   (set! *1 value)))))
-           (catch Throwable e
-             (caught e)
-             (set! *e e))))]
-    (with-bindings
-     (try
-      (init)
-      (catch Throwable e
-        (caught e)
-        (set! *e e)))
-     (prompt)
-     (flush)
-     (loop []
-       (when-not
-       	 (try (identical? (read-eval-print) request-exit)
-	  (catch Throwable e
-	   (caught e)
-	   (set! *e e)
-	   nil))
-         (when (need-prompt)
-           (prompt)
-           (flush))
-         (recur))))))
+  ;; Use Gershwin's LineNumberingPushbackReader, with buffer size of 2
+  (binding [*in* (LineNumberingPushbackReader. (InputStreamReader. System/in))]
+    (let [{:keys [init need-prompt prompt flush read eval print caught]
+           :or {init        #()
+                need-prompt (if (instance? LineNumberingPushbackReader *in*)
+                              #(.atLineStart ^LineNumberingPushbackReader *in*)
+                              #(identity true))
+                prompt      repl-prompt
+                flush       flush
+                read        repl-read
+                eval        rt/gershwin-eval
+                print       prn
+                caught      repl-caught}}
+          (apply hash-map options)
+          request-prompt (Object.)
+          request-exit (Object.)
+          ;; Ctrl-D doesn't always work
+          check-exit #(or (= % :gershwin.core/exit)
+                          (= % :gershwin.core/quit))
+          read-eval-print
+          (fn []
+            (try
+              ;; Load Gershwin core and RT utilities
+              (require '[gershwin.core :refer :all])
+              (require '[gershwin.rt :refer :all])
+              ;; Main REPL loop
+              (let [read-eval *read-eval*
+                    input (with-read-known (read request-prompt request-exit))]
+                (if (check-exit input)
+                  (System/exit 0)
+                  (or (#{request-prompt request-exit} input)
+                      (let [value (binding [*read-eval* read-eval] (eval input))]
+                        ;; The data stack gets printed in the repl-prompt fn
+                        ;; (print value)
+                        (set! *3 *2)
+                        (set! *2 *1)
+                        (set! *1 value)))))
+              (catch Throwable e
+                (caught e)
+                (set! *e e))))]
+      (with-bindings
+        (try
+          (init)
+          (catch Throwable e
+            (caught e)
+            (set! *e e)))
+        (prompt)
+        (flush)
+        (loop []
+          (when-not
+              (try (identical? (read-eval-print) request-exit)
+                   (catch Throwable e
+                     (caught e)
+                     (set! *e e)
+                     nil))
+            (when (need-prompt)
+              (prompt)
+              (flush))
+            (recur)))))))
 
 (defn load-script
   "Loads Clojure source from a file or resource given its path. Paths

@@ -2,7 +2,7 @@
   (:require [gershwin.core :refer :all]))
 
 '[gershwin.test :refer :all] require
-'[gershwin.string :as :str] require
+'[gershwin.string :as str] require
 
 : suite [-- ?]
   !! Math

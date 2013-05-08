@@ -520,7 +520,6 @@ public class Compiler {
         }
 
         public String emit() {
-            System.out.println("QUOTATION EMIT: " + this.quot + ", " + this.quot.getDefinitionForm());
             return this.quot.getDefinitionForm().toString();
         }
     }

@@ -74,6 +74,13 @@
   "x y z --> z y x and pass it that way to a Clojure function."
   [a-fn] (let [z (pop-it) y (pop-it) x (pop-it)] (a-fn x y z)))
 
+;; Provide aliases for < and > since we use those as delimiters
+;; for quotations and this messes up editors.
+(def gt >)
+(def lt <)
+(def gt= >=)
+(def lt= <=)
+
 ;;;;
 ;; BEGIN Copying of Clojure's core.clj, to allow loading using
 ;; Gershwin's loader instead of Clojure's.

@@ -6,3 +6,5 @@
 "\n\nRunning Gershwin Test Suite\n\n" print
 
 < core/suite > run-suite
+
+"\n\n" print

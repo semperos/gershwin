@@ -9,10 +9,11 @@
   [?s -- ?]
   !! @todo Implement in Gershwin when map:filter are ready
   dup < false? > filter dup empty?
-  < drop count " tests PASSED." str2 println >
+  < drop count " tests PASSED." str2 println :pass >
   <
     count " tests FAILED." str2 println
-    "Test Results:\n" swap str2
+    "Test Results:\n" swap "\n" str3 println
+    :fail
   > if ;
 
 : unit-test

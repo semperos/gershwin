@@ -32,6 +32,9 @@
   < "yes" > < 42 "yes" "no" ? >                                   unit-test
   < < "yes" > > < 42 < "yes" > < "no" > ? >                       unit-test
   < "yes" > < 42 < "yes" > < "no" > if >                          unit-test
+  < "no"  > < 42 < "yes" > < "no" > if-not >                      unit-test
+  < "yes" > < true < "yes" > when >                               unit-test
+  < "no" > < false < "no" > when-not >                            unit-test
 
   !! Collections
   < :foo > < 1 [:bar :foo :baz] nth >                             unit-test
@@ -64,17 +67,25 @@
   < 18 > < [1 2 3 4 5] 3 < + > reduce-with >                      unit-test
   < "Do Not Play With Fire" >
   < ["Play " "With " "Fire"] "Do Not " < str2 > reduce-with >     unit-test
-  < [] > < [1 3 5 7] < even? > filter > unit-test
-  < [1 3 5 7] > < [1 3 5 7] < odd? > filter > unit-test
-  < [] > < [2 4 6 8] < even? > remove > unit-test
-  < [2 4 6 8] > < [2 4 6 8] < odd? > remove > unit-test
+  < [] > < [1 3 5 7] < even? > filter >                           unit-test
+  < [1 3 5 7] > < [1 3 5 7] < odd? > filter >                     unit-test
+  < [] > < [2 4 6 8] < even? > remove >                           unit-test
+  < [2 4 6 8] > < [2 4 6 8] < odd? > remove >                     unit-test
+  < [5 10 15] >
+  < [1 2 3 4 5 6 7 8 9 10] < 5 * > map 3 take >                   unit-test
 
 
-  !! Strings
+
+  !! Strings & Regular Expressions
+  < "42" > < 42 str >                                             unit-test
+  < "blue 42" > < "blue " 42 str2 >                               unit-test
+  < "red white blue" > < "red " "white " "blue" str3 >            unit-test
   < "football" > < "llabtoof" str/reverse >                       unit-test
   < "fzz" > < "foo" "o" "z" str/replace >                         unit-test
   < "XnXmXtXpXXXX" >
-  < "onomatopoeia" #"[aeiou]" "X" str/replace >                   unit-test ;
+  < "onomatopoeia" #"[aeiou]" "X" str/replace >                   unit-test
+  < "fYYtbYll" >
+  < "football" "[ao]" re-pattern "Y" str/replace >                unit-test ;
 
   !! @todo Current impl only supports single value returns
   !! < 4 3 > < 3 4 swap >                                         unit-test

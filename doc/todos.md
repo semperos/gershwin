@@ -6,7 +6,6 @@
 
 ## Features ##
 
- * Store Stack in a Var
  * Make Gershwin 'require' word catch exception that a proper Clojure or class file was not found and then force an on-the-fly compilation. This is supposed to be captured in RT.load, so investigate that as well.
  * Since Clojure's `map` can work on multiple collections, provide at least equivalent `map2` and `map3` Gershwin words
  * Consider accepting either ';' or ';;' to terminate word definitions
@@ -25,6 +24,7 @@
 
 ## Maybe's ##
 
+ * Consider data structure used to store Stack
  * Allow identifiers that start with numbers, like Factor (name-munging like Clojure does for ! => BANG)
  * Consider refactor to write impl. completely in Clojure and use Clojure's tools.reader as exemplar for Gershwin reader, as well as the Gershwin reader's Clojure delegate
 

@@ -303,6 +303,10 @@
 
 : boolean [x -- ?] < true > < false > if ;
 
+: true? [? -- ?] (ap true?) ;
+
+: false? [? -- ?] (ap false?) ;
+
 !! ### Apply combinators ###
 
 !! Apply combinators apply a single quotation to multiple values. In this way, they are equivalent to using the spread combinators with each quotation being identical. The ampersand `&` denotes apply combinators (The `@` from Factor cannot be used as a Clojure:Gershwin symbol character).
@@ -378,6 +382,10 @@
 : cons [x coll -- coll] (pop-n-swap cons) ;
 
 : dissoc [coll k -- coll] (pop-n-swap dissoc) ;
+
+: count [coll -- n] (ap count) ;
+
+: empty? [coll -- ?] (ap empty?) ;
 
 : contains?
   [coll item -- ?]

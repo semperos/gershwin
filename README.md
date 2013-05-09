@@ -1,4 +1,4 @@
-# Gershwin: Stack-based Clojure #
+# Gershwin: Stack-based, Concatenative Clojure #
 
 Gershwin is in early development. Take a look at `src/main/gwn/gershwin/core.gwn` to learn more about the language implementation, or the files under `src/main/java/gershwin/lang/` and `src/main/clj/gershwin` to peruse the parser, compiler, and runtime infrastructure.
 

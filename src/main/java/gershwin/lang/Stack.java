@@ -13,7 +13,7 @@ import clojure.lang.PersistentVector;
  * that affect the state of the Atom holding the stack.
  */
 public class Stack {
-    private static Atom stackAtom = new Atom(PersistentVector.EMPTY);;
+    private static Atom stackAtom = new Atom(PersistentVector.EMPTY);
     private static IFn CLOJURE_CONJ = ClojureApi.var("clojure.core", "conj");
     private static IFn CLOJURE_POP = ClojureApi.var("clojure.core", "pop");
     private static String STACK_UNDERFLOW_MSG = "Data stack underflow. Can't take something off an empty data stack.";

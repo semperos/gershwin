@@ -30,7 +30,7 @@ ledit -x -h ~/.gershwin_repl_history mvn -Prepl test
 
 ## Examples
 
-You can read the test suite under `src/test/gwn/gershwin` or take a look at [a small example project](https://github.com/semperos/prez-gwn) to see examples of Gershwin code.
+You can read the in-progress test suite under `src/test/gwn/gershwin` or take a look at [a small example project](https://github.com/semperos/prez-gwn) to see examples of Gershwin code (try [this file](https://github.com/semperos/prez-gwn/blob/master/src/main/gwn/prez/gershwin.gwn)).
 
 ## Editor Support
 

@@ -3,8 +3,10 @@
 '[gershwin.test :refer [run-suite]] require
 '[gershwin.core-test :as core] require
 
-"\n\nRunning Gershwin Test Suite\n\n" print
+"\nRunning Gershwin Test Suite\n\n" print
 
 < core/suite > run-suite
 
 :fail = < (System/exit 1) > when
+
+"\n" print

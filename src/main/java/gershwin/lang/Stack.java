@@ -74,10 +74,12 @@ public class Stack {
     public static Object popIt() {
         IPersistentStack rawStack = (IPersistentStack) stackAtom.deref();
         Object item = rawStack.peek();
-        // What was peeked above and what gets mutably popped below
-        // are not guaranteed to be the same thing. Reconsider use of Atom.
         try {
-            stackAtom.swap(CLOJURE_POP);
+            // Try again if, between the above peek and the change to the atom,
+            // the underlying value has changed.
+            if(!stackAtom.compareAndSet(rawStack, rawStack.pop())) {
+                return popIt();
+            }
         } catch(IllegalStateException e) {
             throw new StackUnderflowException(STACK_UNDERFLOW_MSG);
         }

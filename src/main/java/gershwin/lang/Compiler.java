@@ -483,16 +483,6 @@ public class Compiler {
             // @todo Attach metadata
             Object varForm = withStackVoid(clojure.lang.RT.list(DEF, Symbol.intern("^:word"), gershwinName, fnForm));
             return varForm.toString();
-            // IFn definition = (IFn) clojure.lang.Compiler.eval(fnForm, false);
-            // Word word = new Word(stackEffect, definition);
-            // if(wordMeta != null) {
-            //     createVar(gershwinName, word, wordMeta.assoc(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect)));
-            // } else if(docString != null) {
-            //     createVar(gershwinName, word, docString, clojure.lang.RT.map(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect)));
-            // } else {
-            //     createVar(gershwinName, word, clojure.lang.RT.map());
-            // }
-            // return word;
         }
     }
 

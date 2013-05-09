@@ -3,10 +3,13 @@
 '[gershwin.test :refer [run-suite]] require
 '[gershwin.core-test :as core] require
 
-"\nRunning Gershwin Test Suite\n\n" print
+!! Note: All files under src/main/resources are filtered by Maven.
+${maven.test.skip} <
+  "\nRunning Gershwin Test Suite\n\n" print
 
-< core/suite > run-suite
+  < core/suite > run-suite
 
-:fail = < (System/exit 1) > when
+  :fail = < (System/exit 1) > when
 
-"\n" print
+  "\n" print
+> when-not

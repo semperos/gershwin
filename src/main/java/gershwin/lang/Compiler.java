@@ -192,7 +192,7 @@ public class Compiler {
     public static void writeClojureFile(String internalName, List<String> lines) throws IOException {
         String genPath = (String) clojure.lang.Compiler.COMPILE_PATH.deref();
         if(genPath == null)
-            throw Util.runtimeException("*gershwin-compile-path* not set");
+            throw Util.runtimeException("*compile-path* not set");
         String [] dirs = internalName.split("/");
         String p = genPath;
         for(int i = 0; i < dirs.length - 1; i++) {

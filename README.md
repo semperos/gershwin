@@ -34,7 +34,7 @@ You can read the in-progress test suite under `src/test/gwn/gershwin` or take a 
 
 ## Editor Support
 
-This repository houses a basic Emacs major mode, `gershwin-mode`, under `support/emacs/gershwin-mode`. This mode is derived from `clojure-mode` and provides some Gershwin-specific syntax highlighting, as well as treating `<` and `>` as proper delimiters.
+This repository houses a basic Emacs major mode, `gershwin-mode`, located under `support/emacs/gershwin-mode`. This mode is derived from `clojure-mode` and provides some Gershwin-specific syntax highlighting, as well as treating `<` and `>` as proper delimiters. Just save the `gershwin-mode.el` file somewhere on your Emacs load path and add `(require 'gershwin-mode)` to your Emacs config.
 
 ## License
 

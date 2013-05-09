@@ -330,9 +330,14 @@ public class Compiler {
                 if(metadata.containsKey(WORD_KW)) {
                     if(clojure.lang.RT.booleanCast(metadata.valAt(WORD_KW))) {
                         // This is a word fn, invoke it immediately
-                        invoked = true;
-                        IFn fn = (IFn) aVar.deref();
-                        fn.invoke();
+                        Object value = aVar.deref();
+                        if(value instanceof IFn) {
+                            invoked = true;
+                            ((IFn) value).invoke();
+                        } else if(value instanceof Word) {
+                            invoked = true;
+                            ((Word) value).invoke();
+                        }
                     }
                 }
             }

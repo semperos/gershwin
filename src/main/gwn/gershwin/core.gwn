@@ -293,15 +293,15 @@
   [? t f]
   rot < drop > < nip > if ;
 
-: or "Outputs first truthy value, or false if neither is truthy."
-  [x y -- ?]
-  dupd ? ;
-
 : and "If both values are true, outputs TOS. Else returns false."
   [x y -- ?]
   over ? ;
 
 : boolean [x -- ?] < true > < false > if ;
+
+: or "Outputs first truthy value, or false if neither is truthy."
+  [x y -- ?]
+  dupd ? dup < boolean > when-not ;
 
 : true? [? -- ?] (ap true?) ;
 

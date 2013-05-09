@@ -236,5 +236,6 @@ Possible values of :qualifier include \"GA\", \"SNAPSHOT\", \"RC-x\" \"BETA-x\""
            (require [lib kw words])
            (require spec)))
        (do
-         (gershwin-compile spec)
+         (when recompile?
+           (gershwin-compile spec))
          (require spec)))))

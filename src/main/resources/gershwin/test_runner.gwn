@@ -7,4 +7,4 @@
 
 < core/suite > run-suite
 
-"\n\n" print
+:fail = < (System/exit 1) > when

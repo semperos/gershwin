@@ -322,9 +322,9 @@ by default when a new command-line REPL is started."} repl-requires
   beginning with @ or @/ are considered relative to classpath."
   [^String path]
   (if (.startsWith path "@")
-    (RT/loadResourceScript
+    (gershwin.lang.RT/loadResourceScript
      (.substring path (if (.startsWith path "@/") 2 1)))
-    (Compiler/loadFile path)))
+    (gershwin.lang.Compiler/loadFile path)))
 
 (defn- init-opt
   "Load a script"
@@ -386,7 +386,7 @@ by default when a new command-line REPL is started."} repl-requires
   (with-bindings
     (initialize args inits)
     (if (= path "-")
-      (load-reader *in*)
+      (rt/gershwin-load-reader *in*)
       (load-script path))))
 
 (defn- null-opt

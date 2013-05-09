@@ -41,7 +41,8 @@
     "load" "require" "reload" "compile" "clear" "pr" "prn" "print" "println"
     "type" "class" "symbol" "symbol?"
     "function?" "var" "gershwin-var" "if" "if-not" "when" "when-not" "?" "or" "and"
-    "re-pattern" "str" "str2" "str3" "take" "map" "reduce" "filter" "remove" "in-ns")
+    "re-pattern" "str" "str2" "str3" "take" "map" "reduce" "filter" "remove" "in-ns"
+    "first" "second" "last" "peek")
   "Words built into the core of Gershwin")
 
 ;;;###autoload

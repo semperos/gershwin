@@ -439,13 +439,16 @@ public class Compiler {
             // Clojure source
             Object defForm = emitDefinition(rawForms);
             Word word = new Word(stackEffect, definition, defForm);
-            if(wordMeta != null) {
-                createVar(gershwinName, word, wordMeta.assoc(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect)));
-            } else if(docString != null) {
-                createVar(gershwinName, word, docString, clojure.lang.RT.map(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect)));
-            } else {
-                createVar(gershwinName, word, clojure.lang.RT.map());
+            if(wordMeta == null) {
+                wordMeta = PersistentHashMap.EMPTY;
             }
+            wordMeta = wordMeta
+                .assoc(STACK_EFFECT_KEY, clojure.lang.RT.list(QUOTE, stackEffect))
+                .assoc(WORD_KW, true);
+            if(docString != null) {
+                wordMeta = wordMeta.assoc(DOC_KEY, docString);
+            }
+            createVar(gershwinName, word, wordMeta);
             return word;
         }
 
@@ -788,18 +791,6 @@ public class Compiler {
         Var newVar = (Var) clojure.lang.Compiler.eval(varForm, false);
         if(formMeta != null) {
             newVar.setMeta(formMeta);
-        }
-    }
-
-    /**
-     * Create a Clojure {@link clojure.lang.Var} and bind it
-     * to {@code form}.
-     */
-    public static void createVar(Symbol name, Object form, String docString, IPersistentMap formMeta) {
-        IObj varForm = (IObj) clojure.lang.RT.list(DEF, name, form);
-        Var newVar = (Var) clojure.lang.Compiler.eval(varForm, false);
-        if(docString != null) {
-            newVar.setMeta(formMeta.assoc(DOC_KEY, docString));
         }
     }
 

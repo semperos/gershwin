@@ -15,7 +15,7 @@
   < true > < 'foo symbol? > unit-test
   < false > < :foo symbol? > unit-test
   < true > < (fn [] 42) function? > unit-test
-  < true > < :foo function? > unit-test
+  < false > < :foo function? > unit-test
   < false > < "foo" function? > unit-test
 
   !! Math

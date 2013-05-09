@@ -11,6 +11,10 @@
   < "bazbarfoo" > < "foo" "bar" "baz" clojure.core/str apply3 >   unit-test
   < 1 > < 3 2 clojure.core/- apply-swap >                         unit-test
 
+  !! Namespaces
+  < true > < all-ns count 1 gt > unit-test
+  < true > < all-ns 'gershwin.core the-ns has-item? boolean > unit-test
+
   !! Types
   < true > < 'foo symbol? >                                       unit-test
   < false > < :foo symbol? >                                      unit-test
@@ -54,11 +58,11 @@
   < :foo >
   < [:bar :baz :foo :wow] < #{:foo :other} apply > some >         unit-test
   < :foo >
-  < [:bar :baz :foo :wow] #{:foo :other} has-items >              unit-test
+  < [:bar :baz :foo :wow] #{:foo :other} has-items? >              unit-test
   < :foo >
-  < [:bar :baz :foo :wow] [:foo :other] has-items >               unit-test
+  < [:bar :baz :foo :wow] [:foo :other] has-items? >               unit-test
   < :foo >
-  < [:bar :baz :foo :wow] :foo has-item >                         unit-test
+  < [:bar :baz :foo :wow] :foo has-item? >                         unit-test
   < [2 4 6 8 10] > < [1 2 3 4 5] < 2 * > map >                    unit-test
   < ["party time" "sleep time" "coding time"] >
   < ["party" "sleep" "coding"]  < " time" str2 > map >            unit-test

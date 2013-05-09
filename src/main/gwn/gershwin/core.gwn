@@ -16,7 +16,19 @@
   [arg --]
   (stack-void (ap #(gershwin-require % true))) ;
 
+: alias "Add an alias in the current namespace to another namespace."
+  [alias namespace-sym --]
+  (stack-void (ap 2 alias)) ;
+
 : in-ns [s --] (stack-void (ap in-ns)) ;
+
+: all-ns "Puts a sequence of all namespace on TOS."
+  [-- coll]
+  (all-ns) ;
+
+: the-ns "If TOS is a Namespace, returns it, else tries to find the Namespace named by TOS."
+  [x -- Namespace]
+  (ap the-ns) ;
 
 !! ## Invokables ##
 
@@ -69,6 +81,10 @@
 : class "Get an item's class"
   [x -- y]
   (ap class) ;
+
+: ancestors "Put immediate and indirect parents of item on TOS."
+  [x -- coll]
+  (ap ancestors) ;
 
 : symbol "Coerce TOS to a symbol"
   [x -- y]
@@ -359,13 +375,19 @@
 
 !! Equality
 
-: = [n -- ?] (ap 2 =) ;
+: = [x x -- ?] (ap 2 =) ;
+
+: == [n n -- ?] (ap 2 ==) ;
 
 !! Collections
 
 !! Major cheating for now; use Clojure directly.
 
 : assoc [coll k v -- coll] (pop-n-swap2 assoc) ;
+
+: get [key m -- x] (ap 2 get) ;
+
+: aget [idx java-array -- x] (ap 2 aget) ;
 
 : first [coll -- x] (ap first) ;
 
@@ -387,6 +409,8 @@
 
 : count [coll -- n] (ap count) ;
 
+: alength [java-array -- n] (ap alength) ;
+
 : empty? [coll -- ?] (ap empty?) ;
 
 : contains?
@@ -407,13 +431,13 @@
             (recur (rest coll))))
         nil))) ;
 
-: has-items "Same as has-item, but expects a collection of items to check for instead of a single one."
+: has-items? "Same as has-item, but expects a collection of items to check for instead of a single one."
   [coll coll -- item-or-nil]
   clojure.core/set apply clojure.core/some apply2 ;
 
-: has-item "For everyone who thinks (some #{:foo} coll) is a rare departure from Clojure's otherwise pragmatic nature. Behaves like (some #{:foo} coll), returning the item being asked about if present or nil otherwise."
+: has-item? "For everyone who thinks (some #{:foo} coll) is a rare departure from Clojure's otherwise pragmatic nature. Behaves like (some #{:foo} coll), returning the item being asked about if present or nil otherwise."
   [coll item -- item-or-nil]
-  [] swap conj has-items ;
+  [] swap conj has-items? ;
 
 : map "Invoke the quotation for each element in the collection, putting the new collection of these results on TOS."
   [coll quot -- coll]

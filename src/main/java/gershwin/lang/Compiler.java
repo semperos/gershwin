@@ -682,11 +682,11 @@ public class Compiler {
         if(maybeVar != null && maybeVar instanceof Var) {
             Var aVar = (Var) maybeVar;
             if(aVar.isBound()) {
-                if(aVar.deref() instanceof Word) {
-                    return analyzeWord((Word) aVar.deref());
-                } else {
-                    return analyzeClojure(aVar);
-                }
+                // if(aVar.deref() instanceof Word) {
+                //     return analyzeWord((Word) aVar.deref());
+                // } else {
+                return analyzeClojure(aVar);
+                // }
             } else {
                 return analyzeClojure(form);
             }

@@ -37,6 +37,7 @@
   < {:lang "gershwin"} > < {:lang "clojure"} :lang "gershwin" assoc > unit-test
   < [1 2 3 4] > < [1 2 3] 4 conj > unit-test
   < '(1 2 3 4) > < 1 '(2 3 4) cons > unit-test
+  < :foo > < 1 [:bar :foo :baz] nth > unit-test
 
   !! Strings
   < "football" > < "llabtoof" str/reverse > unit-test

@@ -383,6 +383,8 @@
 
 : dissoc [coll k -- coll] (pop-n-swap dissoc) ;
 
+: nth [n coll -- x] (ap 2 nth) ;
+
 : count [coll -- n] (ap count) ;
 
 : empty? [coll -- ?] (ap empty?) ;

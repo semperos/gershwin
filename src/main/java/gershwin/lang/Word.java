@@ -1,5 +1,6 @@
 package gershwin.lang;
 
+import clojure.lang.AFn;
 import clojure.lang.IFn;
 import clojure.lang.IObj;
 import clojure.lang.ISeq;
@@ -18,7 +19,7 @@ import java.util.Iterator;
  *
  * If metadata support needed, implement IObj
  */
-public class Word implements IInvocable {
+public class Word extends AFn {
     private final IPersistentCollection stackEffect;
     private final IFn definitionFn;
     private Object definitionForm;
@@ -80,6 +81,7 @@ public class Word implements IInvocable {
     /**
      * Invoke a word definition by invoking the Clojure function that is its impl.
      */
+    @Override
     public Object invoke() {
         return Compiler.eval(this.definitionFn.invoke());
     }

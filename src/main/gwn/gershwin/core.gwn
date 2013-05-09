@@ -363,6 +363,14 @@
 
 : assoc [coll k v -- coll] (pop-n-swap2 assoc) ;
 
+: first [coll -- x] (ap first) ;
+
+: second [coll -- x] (ap second) ;
+
+: last [coll -- x] (ap last) ;
+
+: peek [vector -- x] (ap peek) ;
+
 !! @todo update-in
 
 : conj [coll x -- coll] (pop-n-swap conj) ;

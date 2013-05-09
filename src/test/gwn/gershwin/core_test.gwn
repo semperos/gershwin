@@ -6,42 +6,69 @@
 
 : suite [-- ?]
   !! Applicative Utilities
-  < 42 > < {:answer 42} :answer apply > unit-test
-  < 42 > < 21 21 clojure.core/+ apply2 > unit-test
-  < "bazbarfoo" > < "foo" "bar" "baz" clojure.core/str apply3 > unit-test
-  < 1 > < 3 2 clojure.core/- apply-swap > unit-test
+  < 42 > < {:answer 42} :answer apply >                           unit-test
+  < 42 > < 21 21 clojure.core/+ apply2 >                          unit-test
+  < "bazbarfoo" > < "foo" "bar" "baz" clojure.core/str apply3 >   unit-test
+  < 1 > < 3 2 clojure.core/- apply-swap >                         unit-test
 
   !! Types
-  < true > < 'foo symbol? > unit-test
-  < false > < :foo symbol? > unit-test
-  < true > < (fn [] 42) function? > unit-test
-  < false > < :foo function? > unit-test
-  < false > < "foo" function? > unit-test
+  < true > < 'foo symbol? >                                       unit-test
+  < false > < :foo symbol? >                                      unit-test
+  < true > < (fn [] 42) function? >                                unit-test
+  < false > < :foo function? >                                    unit-test
+  < false > < "foo" function? >                                   unit-test
 
   !! Math
-  < 42 > < 21 21 + > unit-test
+  < 42 > < 21 21 + >                                              unit-test
 
   !! Booleans
-  < true > < 42 boolean > unit-test
-  < true > < 0 boolean > unit-test
-  < true > < "" boolean > unit-test
-  < true > < [] boolean > unit-test
-  < true > < {} boolean > unit-test
-  < false > < nil boolean > unit-test
-  < false > < false boolean > unit-test
-  < "yes" > < 42 "yes" "no" ? > unit-test
-  < < "yes" > > < 42 < "yes" > < "no" > ? > unit-test
-  < "yes" > < 42 < "yes" > < "no" > if > unit-test
+  < true > < 42 boolean >                                         unit-test
+  < true > < 0 boolean >                                          unit-test
+  < true > < "" boolean >                                         unit-test
+  < true > < [] boolean >                                         unit-test
+  < true > < {} boolean >                                         unit-test
+  < false > < nil boolean >                                       unit-test
+  < false > < false boolean >                                     unit-test
+  < "yes" > < 42 "yes" "no" ? >                                   unit-test
+  < < "yes" > > < 42 < "yes" > < "no" > ? >                       unit-test
+  < "yes" > < 42 < "yes" > < "no" > if >                          unit-test
 
   !! Collections
-  < {:lang "gershwin"} > < {:lang "clojure"} :lang "gershwin" assoc > unit-test
-  < [1 2 3 4] > < [1 2 3] 4 conj > unit-test
-  < '(1 2 3 4) > < 1 '(2 3 4) cons > unit-test
-  < :foo > < 1 [:bar :foo :baz] nth > unit-test
+  < :foo > < 1 [:bar :foo :baz] nth >                             unit-test
+  < {:lang "gershwin"} >
+  < {:lang "clojure"} :lang "gershwin" assoc >                    unit-test
+  < [1 2 3 4] > < [1 2 3] 4 conj >                                unit-test
+  < '(1 2 3 4) > < 1 '(2 3 4) cons >                              unit-test
+  < {:foo "bar"} >
+  < {:foo "bar" :lang "gershwin"} :lang dissoc >                  unit-test
+  < 5 > < [1 2 3 4 5] count >                                     unit-test
+  < 0 > < '() count >                                             unit-test
+  < true > < [] empty? >                                          unit-test
+  < false > < [1] empty? >                                        unit-test
+  < true > < {:foo "bar"} :foo contains? >                        unit-test
+  < false > < {:foo "bar"} :baz contains? >                       unit-test
+  < :foo >
+  < [:bar :baz :foo :wow] < #{:foo :other} apply > some >         unit-test
+  < :foo >
+  < [:bar :baz :foo :wow] #{:foo :other} has-items >              unit-test
+  < :foo >
+  < [:bar :baz :foo :wow] [:foo :other] has-items >               unit-test
+  < :foo >
+  < [:bar :baz :foo :wow] :foo has-item >                         unit-test
+  < [2 4 6 8 10] > < [1 2 3 4 5] < 2 * > map >                    unit-test
+  < ["party time" "sleep time" "coding time"] >
+  < ["party" "sleep" "coding"]  < " time" str2 > map >            unit-test
+  < 15 > < [1 2 3 4 5] < + > reduce >                             unit-test
+  < "amanaplanacanalpanama" >
+  < ["a" "man" "a" "plan" "a" "canal" "panama"] < str2 > reduce > unit-test
+  < 18 > < [1 2 3 4 5] 3 < + > reduce-with >                      unit-test
+
 
   !! Strings
-  < "football" > < "llabtoof" str/reverse > unit-test
-  < "fzz" > < "foo" "o" "z" str/replace > unit-test ;
+  < "football" > < "llabtoof" str/reverse >                       unit-test
+  < "fzz" > < "foo" "o" "z" str/replace >                         unit-test
+  < "XnXmXtXpXXXX" >
+  < "onomatopoeia" #"[aeiou]" "X" str/replace >                   unit-test ;
 
   !! @todo Current impl only supports single value returns
-  !! < 4 3 > < 3 4 swap > unit-test
+  !! < 4 3 > < 3 4 swap >                                         unit-test

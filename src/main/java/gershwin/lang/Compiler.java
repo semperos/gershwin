@@ -67,11 +67,14 @@ public class Compiler {
             if(rawForm instanceof Symbol) {
                 Expr expr = analyzeSymbol((Symbol) rawForm);
                 if(expr instanceof WordExpr) {
-                    Word word = ((WordExpr) expr).getWord();
+                    // Word word = ((WordExpr) expr).getWord();
                     // Clojure turtles all the way down.
+                    Var var = (Var) maybeSymbolIsWord(rawForm);
                     // @todo Consider using withInvoke instead, for clarity
-                    definitionForms = conj(definitionForms, clojure.lang.RT.list(word.getDefinitionFn()));
+                    // definitionForms = conj(definitionForms, clojure.lang.RT.list(word.getDefinitionFn()));
+                    definitionForms = conj(definitionForms, withInvoke(var));
                 } else if(expr instanceof ClojureExpr) {
+                    // Var var = (Var) maybeSymbolIsWord(rawForm);
                     ClojureExpr clojureExpr = (ClojureExpr) expr;
                     if(clojureExpr.isWord()) {
                         definitionForms = conj(definitionForms, withInvoke(clojureExpr.val()));

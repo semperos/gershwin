@@ -16,10 +16,6 @@
   [arg --]
   (stack-void (ap #(gershwin-require % true))) ;
 
-: alias "Add an alias in the current namespace to another namespace."
-  [alias namespace-sym --]
-  (stack-void (ap 2 alias)) ;
-
 : in-ns [s --] (stack-void (ap in-ns)) ;
 
 : all-ns "Puts a sequence of all namespace on TOS."

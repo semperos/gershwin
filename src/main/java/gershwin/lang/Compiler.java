@@ -577,52 +577,6 @@ public class Compiler {
         }
     }
 
-    /**
-     * Here to be instructive, fuels if*. Regular if is simply
-     * implemented in Clojure, since it relies on quotations.
-     */
-    // public static class IfExpr implements Expr {
-    //     final Object condition;
-    //     final Quotation thenQuotation;
-    //     final Quotation elseQuotation;
-
-    //     public IfExpr(Object condition, Quotation thenQuotation, Quotation elseQuotation) {
-    //         this.condition = condition;
-    //         this.thenQuotation = thenQuotation;
-    //         this.elseQuotation = elseQuotation;
-    //     }
-
-    //     public Object eval() {
-    //         if(condition != null && condition != Boolean.FALSE)
-    //             return thenQuotation.invoke();
-    //         return elseQuotation.invoke();
-    //     }
-
-    //     static class Parser implements IParser {
-    //         /**
-    //          * Unlike in Clojure, these forms have already been
-    //          * analyzed and are on the stack in evaluated form, so there's
-    //          * no need to analyze these forms and create expr's again.
-    //          */
-    //         public Expr parse(Object form) {
-    //             IPersistentStack sCdr = Stack.pop();
-    //             IPersistentStack sCddr = sCdr.pop();
-    //             Object condition = sCddr.peek();
-    //             Object thenQ = sCdr.peek();
-    //             Object elseQ = Stack.peek();
-    //             if(!(thenQ instanceof Quotation)) {
-    //                 throw Util.runtimeException("The 'then' branch of an if expression must be a quotation.");
-    //             } else if(!(elseQ instanceof Quotation)) {
-    //                 throw Util.runtimeException("The 'else' branch of an if expression must be a quotation.");
-    //             }
-    //             // Easier to use immutable methods above and then just
-    //             // pop everything off the stack in one go.
-    //             for(int i = 0; i < 3; i++) { Stack.popIt(); }
-    //             return new IfExpr(condition, (Quotation) thenQ, (Quotation) elseQ);
-    //         }
-    //     }
-    // }
-
     public static Object eval(Object form) {
         return eval(form, true);
     }

@@ -6,6 +6,8 @@
 
 ## Features ##
 
+ * Add gershwin-declare that does proper suffixing.
+ * Fix bug in lookup of Java classes where Clojure is handed a name__GWN__ symbol and attempts to resolve it.
  * Gershwin syntax for putting together core Clojure data structures but that allows internal Gershwin forms. Currently, raw Clojure syntax like (), [] and {} represent a switch to Clojure interop, inside of which only Clojure is legal. Possibilities include things like `V{` and `}` words for defining vectors, `H{` or `M{` for maps, etc. Current workarounds include building smaller pure-Clojure datastructures and then building in Gershwin forms as needed, for example: `[:foo] a-word conj`.
  * Consider further special-case handling of ns macro to include gershwin.core (and possibly gershwin.rt) by default in Gershwin files.
  * Make Gershwin 'require' word catch exception that a proper Clojure or class file was not found and then force an on-the-fly compilation. This is supposed to be captured in RT.load, so investigate that as well.

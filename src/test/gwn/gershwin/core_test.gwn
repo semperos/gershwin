@@ -21,9 +21,25 @@
   < true > < (fn [] 42) function? >                                unit-test
   < false > < :foo function? >                                    unit-test
   < false > < "foo" function? >                                   unit-test
+  < true >
+  <
+    "foo" class ancestors
+    [] 'java.lang.CharSequence resolve conj
+       'java.lang.Object resolve conj
+    has-items? boolean
+  > unit-test
 
   !! Math
   < 42 > < 21 21 + >                                              unit-test
+
+  !! Equality
+  < true > < (Object.) dup = > unit-test
+  < true > < "foo" "foo" = > unit-test
+  < true > < :bar :bar = > unit-test
+  < true > < 2 2 = > unit-test
+  < false > < 2 2.0 = > unit-test
+  < true > < 2 2.0 == > unit-test
+  < true > < 4.5 45/10 == > unit-test
 
   !! Booleans
   < true > < 42 boolean >                                         unit-test
@@ -43,6 +59,7 @@
 
   !! Collections
   < :foo > < 1 [:bar :foo :baz] nth >                             unit-test
+  < 42 > < "foo" {"foo" 42} get > unit-test
   < {:lang "gershwin"} >
   < {:lang "clojure"} :lang "gershwin" assoc >                    unit-test
   < [1 2 3 4] > < [1 2 3] 4 conj >                                unit-test

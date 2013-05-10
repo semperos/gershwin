@@ -16,6 +16,9 @@
   [arg --]
   (stack-void (ap #(gershwin-require % true))) ;
 
+: eval [f -- x]
+  (stack-void (. gershwin.lang.Compiler (eval (pop-it)))) ;
+
 : in-ns [s --] (stack-void (ap in-ns)) ;
 
 : all-ns "Puts a sequence of all namespace on TOS."

@@ -66,6 +66,8 @@
 
 : println [n --] (stack-void (ap println)) ;
 
+: nil? [x -- ?] (ap nil?) ;
+
 : meta {:added "initial" :doc "Get metadata for TOS. Note that most meaningful metadata is attached to var's that hold the actual values, so you'll need to call `var`"}
   [x -- y]
   (ap meta) ;
@@ -102,6 +104,15 @@
   [x -- y]
   (ap gershwin-var) ;
 
+: if
+  [? then else -- ...]
+  (let [else-quot (pop-it)
+        then-quot (pop-it)
+        condition (pop-it)]
+    (if condition
+      (stack-void (.invoke then-quot))
+      (stack-void (.invoke else-quot)))) ;
+
 !! ## Shuffle words ##
 
 !! Basics are: drop, swap, dup, rot
@@ -131,6 +142,33 @@
         y (pop-it)
         x (pop-it)]
     (conj-it y) (conj-it z) x) ;
+
+
+: ends-with "Returns true if string ends as specified."
+  [s end -- ?]
+  (ap 2 #(.endsWith %2 %1)) ;
+
+: substring
+  [from to s -- s]
+  (let [s (pop-it)
+        to (pop-it)
+        from (pop-it)]
+    (.substring s from to)) ;
+
+: without-gwn-suffix
+  [s -- s]
+  dup 0 swap count 7 - rot substring ;
+
+: resolve "Direct Clojure resolve. Attempts to resolve to a Clojure or Java form if it receives a Gershwin form that isn't defined."
+  [x -- x]
+  dup (resolve (pop-it)) dup nil?
+  <
+    str dup "__GWN__" ends-with
+    < without-gwn-suffix symbol (resolve (pop-it)) >
+    < nil > if
+  > <
+    swap drop
+  > if ;
 
 !! Factor extensions to base set
 
@@ -278,15 +316,6 @@
 !! NOTE: The `spread` word requires words we haven't implemented yet. Punting til later.
 
 !! Booleans
-
-: if
-  [? then else -- ...]
-  (let [else-quot (pop-it)
-        then-quot (pop-it)
-        condition (pop-it)]
-    (if condition
-      (stack-void (.invoke then-quot))
-      (stack-void (.invoke else-quot)))) ;
 
 : if-not
   [? then else -- ...]

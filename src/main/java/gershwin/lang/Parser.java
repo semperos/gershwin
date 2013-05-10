@@ -15,6 +15,8 @@
 package gershwin.lang;
 
 import clojure.lang.AFn;
+import clojure.lang.IFn;
+import clojure.lang.LazilyPersistentVector;
 import clojure.lang.LispReader;
 
 import java.io.IOException;
@@ -24,6 +26,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Parser {
+    static IFn[] macros = new IFn[256];
+    static {
+	macros['['] = new VectorReader();
+	macros['{'] = new MapReader();
+    }
+
+    private static IFn getMacro(int ch){
+	if(ch < macros.length)
+            return macros[ch];
+	return null;
+    }
+
     // *************** Copied because they're not public in LispReader ***************
     /**
      * Allow traditional whitespace or commas to be considered whitespace
@@ -120,6 +134,17 @@ public class Parser {
                     return ret;
                 }
 
+                IFn macroFn = getMacro(ch);
+                if(macroFn != null) {
+                    Object ret = macroFn.invoke(r, (char) ch);
+                    if(clojure.lang.RT.suppressRead())
+                        return null;
+                    //no op macros return the reader
+                    if(ret == r)
+                        continue;
+                    return ret;
+                }
+
                 /**** End Gershwin extensions to Clojure reading ****/
                 // Everything else is just Clojure.
                 // System.out.println("Clojure Reader => " + (char) ch);
@@ -159,6 +184,30 @@ public class Parser {
             return r;
 	}
     }
+
+    public static class VectorReader extends AFn {
+	public Object invoke(Object reader, Object leftparen) {
+            PushbackReader r = (PushbackReader) reader;
+            return LazilyPersistentVector.create(readDelimitedList(']', r, true));
+	}
+    }
+
+    public static class MapReader extends AFn {
+	public Object invoke(Object reader, Object leftparen) {
+            PushbackReader r = (PushbackReader) reader;
+            Object[] a = readDelimitedList('}', r, true).toArray();
+            if((a.length & 1) == 1)
+                throw Util.runtimeException("Map literal must contain an even number of forms");
+            return clojure.lang.RT.map(a);
+	}
+    }
+
+    // public static class SetReader extends AFn {
+    //     public Object invoke(Object reader, Object leftbracket) {
+    //         PushbackReader r = (PushbackReader) reader;
+    //         return PersistentHashSet.createWithCheck(readDelimitedList('}', r, true));
+    //     }
+    // }
 
     public static List readDelimitedList(char delim, PushbackReader r, boolean isRecursive) {
 	final int firstline =

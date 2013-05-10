@@ -406,9 +406,12 @@
 
 !! Collections
 
-!! Major cheating for now; use Clojure directly.
+!! Using Clojure directly.
 
-: assoc [coll k v -- coll] (pop-n-swap2 assoc) ;
+!! @todo Clojure vs. Factor-style argument order is creating a mess in my head.
+!!   Keep an eye out for how these words are composing, and if we're doing swap/rot
+!!   all over the place. That either means the order needs tweaking, or our coding
+!!   coding style does.
 
 : get [key m -- x] (ap 2 get) ;
 
@@ -422,13 +425,29 @@
 
 : peek [vector -- x] (ap peek) ;
 
-!! @todo update-in
-
-: conj [coll x -- coll] (pop-n-swap conj) ;
+: conj [x coll -- coll] (ap 2 conj) ;
 
 : cons [x coll -- coll] (pop-n-swap cons) ;
 
-: dissoc [coll k -- coll] (pop-n-swap dissoc) ;
+: assoc [v k coll -- coll] (ap 3 assoc) ;
+
+: dissoc [k coll -- coll] (ap 2 dissoc) ;
+
+: keys [coll -- coll] (ap keys) ;
+
+: values [coll -- coll] (ap vals) ;
+
+: get-in [keys m -- x]
+  (ap 2 get-in) ;
+
+!! Arg order like assoc ?
+: update-in [quot keys coll]
+  (let [coll (pop-it)
+        keys (pop-it)
+        quot (pop-it)]
+    (conj-it (get-in coll keys))
+    (.invoke quot)
+    (assoc-in coll keys (pop-it))) ;
 
 : nth [n coll -- x] (ap 2 nth) ;
 
@@ -439,8 +458,8 @@
 : empty? [coll -- ?] (ap empty?) ;
 
 : contains?
-  [coll item -- ?]
-  (pop-n-swap contains?) ;
+  [item coll -- ?]
+  (ap 2 contains?) ;
 
 : some "Puts the first truthy value generated from invoking the given quotation for each item in the collection, else puts nil on TOS."
   [coll quot]
@@ -457,12 +476,12 @@
         nil))) ;
 
 : has-items? "Same as has-item, but expects a collection of items to check for instead of a single one."
-  [coll coll -- item-or-nil]
-  clojure.core/set apply clojure.core/some apply2 ;
+  [subcoll coll -- item-or-nil]
+  swap clojure.core/set apply clojure.core/some apply2 ;
 
 : has-item? "For everyone who thinks (some #{:foo} coll) is a rare departure from Clojure's otherwise pragmatic nature. Behaves like (some #{:foo} coll), returning the item being asked about if present or nil otherwise."
-  [coll item -- item-or-nil]
-  [] swap conj has-items? ;
+  [item coll -- item-or-nil]
+  swap [] conj swap has-items? ;
 
 : map "Invoke the quotation for each element in the collection, putting the new collection of these results on TOS."
   [coll quot -- coll]

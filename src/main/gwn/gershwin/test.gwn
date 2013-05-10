@@ -25,7 +25,7 @@
   dup2 < function? > bi& and
   !! If function, invoke, else just test with =
   < < invoke > bi& > when
-  = conj ;
+  = swap conj ;
 
 : run-suite
   "Wrap a set of unit tests as necessary to run them and collect results."

@@ -6,6 +6,7 @@
 
 ## Features ##
 
+ * Provide Gershwin-sensitive compilation of Clojure vectors, maps, specifically to handle quotations
  * Change `has-item?` to `member?` and `has-items?` to `has-any?`
  * Add gershwin-declare that does proper suffixing.
  * Fix bug in lookup of Java classes where Clojure is handed a name__GWN__ symbol and attempts to resolve it.

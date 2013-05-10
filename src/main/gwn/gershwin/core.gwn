@@ -317,6 +317,10 @@
 
 !! Booleans
 
+: if* "Like `if`, but keeps the conditional value on the stack if it is truthy."
+  [? true false -- ...]
+  pick < drop invoke > < nip2 invoke > if ;
+
 : if-not
   [? then else -- ...]
   swap if ;

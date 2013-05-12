@@ -482,13 +482,13 @@
             (recur (rest coll))))
         nil))) ;
 
-: member? "Same as has-item, but expects a collection of items to check for instead of a single one."
+: has-any? "Same as member?, but expects a collection of items to check for instead of a single one."
   [subcoll coll -- item-or-nil]
   swap clojure.core/set apply clojure.core/some apply2 ;
 
-: has-item? "For everyone who thinks (some #{:foo} coll) is a rare departure from Clojure's otherwise pragmatic nature. Behaves like (some #{:foo} coll), returning the item being asked about if present or nil otherwise."
+: member? "For everyone who thinks (some #{:foo} coll) is a rare departure from Clojure's otherwise pragmatic nature. Behaves like (some #{:foo} coll), returning the item being asked about if present or nil otherwise."
   [item coll -- item-or-nil]
-  swap [] conj swap member? ;
+  swap [] conj swap has-any? ;
 
 : map "Invoke the quotation for each element in the collection, putting the new collection of these results on TOS."
   [coll quot -- coll]

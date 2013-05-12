@@ -13,7 +13,7 @@
 
   !! Namespaces
   < true > < all-ns count 1 gt >                                  unit-test
-  < true > < 'gershwin.core the-ns all-ns has-item? boolean >     unit-test
+  < true > < 'gershwin.core the-ns all-ns member? boolean >     unit-test
 
   !! Types
   < true > < 'foo symbol? >                                       unit-test
@@ -25,7 +25,7 @@
   <
     [java.lang.CharSequence java.lang.Object]
     "foo" class ancestors
-    member? boolean
+    has-any? boolean
   >                                                               unit-test
 
   !! Math
@@ -74,11 +74,11 @@
   < :foo >
   < [:bar :baz :foo :wow] < #{:foo :other} apply > some >         unit-test
   < :foo >
-  < #{:foo :other} [:bar :baz :foo :wow] member? >             unit-test
+  < #{:foo :other} [:bar :baz :foo :wow] has-any? >             unit-test
   < :foo >
-  < [:foo :other] [:bar :baz :foo :wow] member? >              unit-test
+  < [:foo :other] [:bar :baz :foo :wow] has-any? >              unit-test
   < :foo >
-  < :foo [:bar :baz :foo :wow] has-item? >                        unit-test
+  < :foo [:bar :baz :foo :wow] member? >                        unit-test
   < [2 4 6 8 10] > < [1 2 3 4 5] < 2 * > map >                    unit-test
   < ["party time" "sleep time" "coding time"] >
   < ["party" "sleep" "coding"]  < " time" str2 > map >            unit-test

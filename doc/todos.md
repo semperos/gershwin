@@ -7,7 +7,6 @@
 ## Features ##
 
  * Provide Gershwin-sensitive compilation of Clojure vectors, maps, specifically to handle quotations
- * Change `has-item?` to `member?` and `has-items?` to `has-any?`
  * Add gershwin-declare that does proper suffixing.
  * Fix bug in lookup of Java classes where Clojure is handed a name__GWN__ symbol and attempts to resolve it.
  * Gershwin syntax for putting together core Clojure data structures but that allows internal Gershwin forms. Currently, raw Clojure syntax like (), [] and {} represent a switch to Clojure interop, inside of which only Clojure is legal. Possibilities include things like `V{` and `}` words for defining vectors, `H{` or `M{` for maps, etc. Current workarounds include building smaller pure-Clojure datastructures and then building in Gershwin forms as needed, for example: `[:foo] a-word conj`.
@@ -37,6 +36,7 @@ At first glance, this seems like a interesting prospect to avoid a lot of menial
 
 Done may mean medium-rare, but cooked enough to make meaningful forward progress.
 
+ * [DONE] Change `has-item?` to `member?` and `has-items?` to `has-any?`
  * [DONE] (Is a feature) Reconsider how vars default back to Clojure ones if not present as Gershwin ones (likely to cause confusion)
  * [DONE] Build orchestration to ensure all Gershwin code has been compiled to Clojure
  * [DONE] AOT compilation -- likely first pass will be Clojure source output -> AOT-compile that, only need to handle custom output for words, quotations, and then of course recursively output body definitions of words, which will eventually work down to Clojure code.

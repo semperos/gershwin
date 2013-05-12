@@ -25,7 +25,7 @@
   <
     [java.lang.CharSequence java.lang.Object]
     "foo" class ancestors
-    has-items? boolean
+    member? boolean
   >                                                               unit-test
 
   !! Math
@@ -74,9 +74,9 @@
   < :foo >
   < [:bar :baz :foo :wow] < #{:foo :other} apply > some >         unit-test
   < :foo >
-  < #{:foo :other} [:bar :baz :foo :wow] has-items? >             unit-test
+  < #{:foo :other} [:bar :baz :foo :wow] member? >             unit-test
   < :foo >
-  < [:foo :other] [:bar :baz :foo :wow] has-items? >              unit-test
+  < [:foo :other] [:bar :baz :foo :wow] member? >              unit-test
   < :foo >
   < :foo [:bar :baz :foo :wow] has-item? >                        unit-test
   < [2 4 6 8 10] > < [1 2 3 4 5] < 2 * > map >                    unit-test

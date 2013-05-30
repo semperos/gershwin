@@ -1,3 +1,11 @@
+# DEPRECATED PROTOYPE #
+
+Please note that this repo represents the prototype, proof-of-concept version of Gershwin I wrote to explore the feasibility of the concept.
+
+The Gershwin code base is now maintained as a fork of Clojure in the [gershwin/gershwin](https://github.com/gershwin/gershwin) repository. Please refer to that repository for Gershwin's implementation.
+
+--------------------------------------------------------------------------------
+
 # Gershwin: Stack-based, Concatenative Clojure #
 
 [![Build Status](https://travis-ci.org/semperos/gershwin.png)](https://travis-ci.org/semperos/gershwin)
